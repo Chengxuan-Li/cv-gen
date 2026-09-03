@@ -30,9 +30,26 @@ local function child(div, class)
   return {}
 end
 
+-- The `dates` attribute is spliced directly into a raw Typst content block
+-- (`[...]`) below, which bypasses Pandoc's own Typst-writer escaping --
+-- that escaping only ever applies to body content Pandoc renders itself,
+-- never to attribute strings this filter interpolates by hand. Inside a
+-- Typst content block, `\` escapes the following character, `#` switches
+-- into code mode, and `[`/`]` open/close a nested block, so any of those
+-- in a dates value would break the sandwich or change its meaning. Escape
+-- `\` first so the escapes added for the other characters aren't themselves
+-- re-escaped.
+local function escape_typst(text)
+  text = text:gsub("\\", "\\\\")
+  text = text:gsub("#", "\\#")
+  text = text:gsub("%[", "\\[")
+  text = text:gsub("%]", "\\]")
+  return text
+end
+
 function Div(el)
   local classes = el.classes
-  local dates = el.attributes["dates"] or ""
+  local dates = escape_typst(el.attributes["dates"] or "")
 
   if classes:includes("cv-head") then
     -- Pandoc walks inner nodes first; the child divs are untouched by this
