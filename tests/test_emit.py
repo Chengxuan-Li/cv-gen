@@ -40,8 +40,8 @@ def test_front_matter_wires_up_the_templates():
     assert out.startswith("---\n")
     assert "format:" in out
     assert "typst:" in out
-    assert "include-in-header: templates/cv.typ" in out
-    assert "filters: [templates/cv.lua]" in out
+    assert "include-in-header: ../templates/cv.typ" in out
+    assert "filters: [../templates/cv.lua]" in out
     assert "format: pdf" not in out  # never LaTeX
 
 

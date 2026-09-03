@@ -6,7 +6,14 @@
 #set list(indent: 0.55em, body-indent: 0.42em, spacing: 0.5em, marker: [•])
 
 // Name.
-#show heading.where(level: 1): it => text(size: 21pt, weight: "bold")[#it.body]
+#show heading.where(level: 1): it => block(width: 100%)[#text(size: 21pt, weight: "bold")[#it.body]]
+
+// Suppress page numbering. Quarto's own boilerplate issues a later
+// `#set page(numbering: "1")` (Typst #set rules merge per field, so that
+// call would silently re-enable a plain `numbering: none` here); setting
+// `footer: none` instead suppresses the footer content that numbering
+// would otherwise populate, and that field is untouched by Quarto's call.
+#set page(numbering: none, footer: none)
 
 // Section heading: bold label with a rule directly beneath.
 #show heading.where(level: 2): it => block(width: 100%, above: 0.95em, below: 0.5em)[

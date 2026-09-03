@@ -11,7 +11,6 @@ from .schema import Entry, Item, Label, Section
 from .select import Document
 
 FRONT_MATTER = """---
-title: "{title}"
 format:
   typst:
     papersize: us-letter
@@ -64,10 +63,18 @@ def _section(section: Section) -> list[str]:
     return lines
 
 
-def render(doc: Document, template_dir: str = "templates") -> str:
-    """Render a document as Quarto markdown."""
+def render(doc: Document, template_dir: str = "../templates") -> str:
+    """Render a document as Quarto markdown.
+
+    `template_dir` is written into the `include-in-header` and `filters`
+    front matter fields. Quarto resolves both paths relative to the
+    generated .qmd file's own directory, not the repo root and not the
+    working directory the render command is invoked from. The default
+    assumes the .qmd is written one level below the repo root (e.g. into
+    `.build/`), which is where the generator currently places it.
+    """
     lines = [
-        FRONT_MATTER.format(title=doc.profile_name, template_dir=template_dir),
+        FRONT_MATTER.format(template_dir=template_dir),
         *_head(doc),
     ]
     for section in doc.sections:
