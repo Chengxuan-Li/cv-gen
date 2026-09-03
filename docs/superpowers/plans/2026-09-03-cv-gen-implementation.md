@@ -414,11 +414,18 @@ def test_unknown_block_type_is_an_error(tmp_path):
 
 
 def test_missing_entry_field_is_an_error(tmp_path):
-    bad = EXPERIENCE.replace("    org: EnergyAtlas.io\n", "")
+    bad = """
+title: Experience
+type: entries
+entries:
+  - location: Ithaca NY
+    dates: Jan 2025 - Current
+    role: Lead Developer
+"""
     with pytest.raises(ValidationError) as excinfo:
         load(write_repo(tmp_path, **{"content/experience.yml": bad}))
     message = str(excinfo.value)
-    assert "org" in message
+    assert "'org'" in message
     assert "entry 0" in message
 
 
@@ -431,7 +438,7 @@ def test_malformed_marker_is_an_error(tmp_path):
 
 def test_all_problems_reported_in_one_pass(tmp_path):
     bad_skills = SKILLS.replace("type: labels", "type: bullets")
-    bad_experience = EXPERIENCE.replace("    org: EnergyAtlas.io\n", "")
+    bad_experience = EXPERIENCE.replace("+[gev-pos-1]", "+[gev-pos-9]")
     with pytest.raises(ValidationError) as excinfo:
         load(
             write_repo(
@@ -1330,9 +1337,11 @@ doc = Document("long", "general", "cv-long-general", "Chengxuan Li",
      Section("awards", "Awards & Grants", "rows", (Item(Marker(), "**Nemetschek Innovation Award (€60,000)** *Second place*", "May 2026"),)),
     ))
 Path(".build").mkdir(exist_ok=True)
-Path(".build/fixture.qmd").write_text(render(doc), encoding="utf-8")
+# keep-typ makes Quarto leave the generated .typ behind for Step 4 to inspect.
+qmd = render(doc).replace("  typst:\n", "  typst:\n    keep-typ: true\n")
+Path(".build/fixture.qmd").write_text(qmd, encoding="utf-8")
 PY
-"/c/Program Files/Quarto/bin/quarto" render .build/fixture.qmd --to typst -M keep-typ:true
+"/c/Program Files/Quarto/bin/quarto" render .build/fixture.qmd --to typst
 ```
 
 Expected: `Output created: .build/fixture.pdf`
