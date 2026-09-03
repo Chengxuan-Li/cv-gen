@@ -201,7 +201,9 @@ line. A section listed for one length and not the other is simply absent there.
 ```
 cv-gen/
   .gitignore            resources/, .build/, out/, __pycache__
-  README.md
+  README.md             usage: marker grammar, block types, adding a variant
+  AGENTS.md             agent operating rules and repo invariants
+  requirements.txt      pyyaml, pytest
   build.py              CLI entry point
   cvgen/                marker.py schema.py select.py emit.py
   variants.yml
