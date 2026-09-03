@@ -65,11 +65,20 @@ def build_one(config: Config, quarto: str, length: str, variant: str) -> Path:
     qmd.write_text(render(doc), encoding="utf-8")
 
     pdf = OUT_DIR / f"{doc.name}.pdf"
+    # Quarto resolves a bare --output filename relative to its own process
+    # cwd, not relative to the input file. Run it with cwd=BUILD_DIR (and
+    # pass bare filenames) so the intermediate .typ and the rendered PDF both
+    # land next to the .qmd, in .build/, where we then move the PDF from.
     subprocess.run(
-        [quarto, "render", str(qmd), "--to", "typst", "--output", pdf.name],
+        [
+            quarto, "render", qmd.name,
+            "--to", "typst",
+            "--output", pdf.name,
+            "-M", "keep-typ:true",  # keep the intermediate .typ in .build/
+        ],
+        cwd=BUILD_DIR,
         check=True,
     )
-    # Quarto writes the output next to the input; move it into out/.
     produced = qmd.with_suffix(".pdf")
     if produced.exists():
         produced.replace(pdf)

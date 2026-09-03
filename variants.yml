@@ -1,0 +1,16 @@
+# Which documents exist. Each (length, variant) pair builds one PDF.
+#
+# `sections` is the default order for that length; a variant may override it.
+# Section names are the filename stems in content/.
+
+long:
+  sections: [skills, experience, publications, awards, education]
+  variants:
+    general: {}
+    # example-role: {sections: [skills, experience, awards, publications, education]}
+
+short:
+  sections: [skills, experience, education]
+  variants:
+    general: {}
+    # example-role: {}

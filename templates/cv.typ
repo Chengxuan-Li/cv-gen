@@ -2,8 +2,13 @@
 // this file and nothing else. Page size, margins, font and base size come from
 // the front matter that emit.py writes.
 
-#set par(leading: 0.58em, spacing: 0.62em, justify: false)
-#set list(indent: 0.55em, body-indent: 0.42em, spacing: 0.5em, marker: [•])
+#set par(leading: 0.52em, spacing: 0.55em, justify: false)
+#set list(indent: 0.55em, body-indent: 0.42em, spacing: 0.4em, marker: [•])
+
+// Pandoc's typst writer emits bare #link[...] with no styling, so a DOI or
+// mailto link is visually indistinguishable from plain text. Underline it,
+// as a reader would expect from a hyperlink.
+#show link: underline
 
 // Name.
 #show heading.where(level: 1): it => block(width: 100%)[#text(size: 21pt, weight: "bold")[#it.body]]
@@ -16,13 +21,21 @@
 #set page(numbering: none, footer: none)
 
 // Section heading: bold label with a rule directly beneath.
-#show heading.where(level: 2): it => block(width: 100%, above: 0.95em, below: 0.5em)[
+#show heading.where(level: 2): it => block(width: 100%, above: 0.75em, below: 0.42em)[
   #text(size: 11.5pt, weight: "bold")[#it.body]
   #v(-0.62em)
   #line(length: 100%, stroke: 0.7pt)
 ]
 
+// Quarto's own template (included after this file) issues its own
+// `#set par(justify: true, ...)` around the document body, which - because
+// it is a `set` inside that template's own function scope - wins over the
+// top-level `justify: false` above for everything the body contains. Each
+// wrapper below re-asserts `justify: false` one scope deeper, inside its own
+// block, which is what actually takes effect for its content.
+
 #let cv-head(left: [], right: []) = block(width: 100%, below: 0.55em)[
+  #set par(justify: false)
   #grid(
     columns: (1fr, auto),
     align(bottom)[#left],
@@ -30,17 +43,22 @@
   )
 ]
 
-#let cv-entry(dates: [], body) = block(width: 100%, above: 0.55em, below: 0.3em)[
+#let cv-entry(dates: [], body) = block(width: 100%, above: 0.42em, below: 0.22em)[
+  #set par(justify: false)
   #grid(columns: (1fr, auto), body, align(top + right)[#dates])
 ]
 
 #let cv-row(dates: [], body) = block(width: 100%, above: 0.28em, below: 0.28em)[
+  #set par(justify: false)
   #grid(columns: (1fr, auto), body, align(top + right)[#dates])
 ]
 
 #let cv-prose(body) = block(width: 100%, above: 0.34em, below: 0.34em)[
-  #set par(hanging-indent: 1.1em)
+  #set par(hanging-indent: 1.1em, justify: false)
   #body
 ]
 
-#let cv-labels(body) = block(width: 100%, above: 0.2em, below: 0.3em)[#body]
+#let cv-labels(body) = block(width: 100%, above: 0.2em, below: 0.3em)[
+  #set par(justify: false)
+  #body
+]

@@ -1,0 +1,16 @@
+title: Technical Skills
+type: labels
+items:
+  - label: Programming
+    text: Python, C#, .NET/ASP.NET, C++
+  - label: ML
+    text: PyTorch, scikit-learn, statsmodels, pandas, SQL, DuckDB
+  - label: Geospatial
+    text: GeoPandas, Shapely, NetTopologySuite
+  - label: Scientific computing
+    text: Optimization, surrogate modeling, Monte Carlo simulation, time-series analysis, signal processing
+  - label: Electrical systems
+    text: >-
+      AC power flow (NR/FDLF), contingency analysis, state estimation, economic
+      dispatch, OPF, static security assessment, demand-response and load
+      flexibility assessment

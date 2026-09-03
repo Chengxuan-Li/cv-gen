@@ -8,9 +8,6 @@ Rendering goes through [Quarto](https://quarto.org) using its bundled
 [Typst](https://typst.app) engine — **no LaTeX distribution required**, and
 builds take well under a second.
 
-> **Status:** design approved and toolchain verified; the generator is being
-> implemented. See [the design spec](docs/superpowers/specs/2026-09-03-cv-gen-design.md).
-
 ## Setup
 
 ```bash
