@@ -169,3 +169,21 @@ def test_all_problems_reported_in_one_pass(tmp_path):
             )
         )
     assert len(excinfo.value.problems) >= 2
+
+
+def test_yaml_list_at_top_level_is_an_error(tmp_path):
+    bad_skills = "- foo\n- bar"
+    with pytest.raises(ValidationError) as excinfo:
+        load(write_repo(tmp_path, **{"content/skills.yml": bad_skills}))
+    message = str(excinfo.value)
+    assert "skills.yml" in message
+    assert "list" in message.lower() or "mapping" in message.lower()
+
+
+def test_empty_content_file_is_an_error(tmp_path):
+    empty_skills = ""
+    with pytest.raises(ValidationError) as excinfo:
+        load(write_repo(tmp_path, **{"content/skills.yml": empty_skills}))
+    message = str(excinfo.value)
+    assert "skills.yml" in message
+    assert "empty" in message.lower()

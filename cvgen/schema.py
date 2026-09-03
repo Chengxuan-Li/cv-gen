@@ -84,10 +84,18 @@ def _read_yaml(path: Path, problems: list[str]) -> dict:
         problems.append(f"{path.name}: file not found at {path}")
         return {}
     try:
-        return yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+        data = yaml.safe_load(path.read_text(encoding="utf-8"))
     except yaml.YAMLError as exc:
         problems.append(f"{path.name}: invalid YAML - {exc}")
         return {}
+
+    if data is None:
+        problems.append(f"{path.name}: empty file")
+        return {}
+    if not isinstance(data, dict):
+        problems.append(f"{path.name}: expected a mapping, got {type(data).__name__}")
+        return {}
+    return data
 
 
 def _item(raw: object, where: str, problems: list[str]) -> Item:
