@@ -1,0 +1,22 @@
+# Private reference materials - never tracked
+resources/
+
+# Generated intermediates and rendered output
+.build/
+out/
+
+# Quarto
+/.quarto/
+*_files/
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
