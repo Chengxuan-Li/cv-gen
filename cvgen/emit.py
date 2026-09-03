@@ -27,7 +27,7 @@ format:
 
 
 def _div(classes: str, body: list[str], **attrs: str) -> list[str]:
-    rendered = "".join(f' {k}="{v}"' for k, v in attrs.items() if v)
+    rendered = "".join(f' {k}="{v.replace('"', '\\"')}"' for k, v in attrs.items() if v)
     return [f"::: {{{classes}{rendered}}}", *body, ":::", ""]
 
 
