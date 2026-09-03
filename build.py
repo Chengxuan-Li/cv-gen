@@ -16,12 +16,16 @@ import sys
 from pathlib import Path
 
 from cvgen.emit import render
-from cvgen.schema import Config, LENGTHS, ValidationError, load
+from cvgen.schema import Config, ValidationError, load
 from cvgen.select import SelectionError, select
 
 BUILD_DIR = Path(".build")
 OUT_DIR = Path("out")
 FALLBACK_QUARTO = Path(r"C:\Program Files\Quarto\bin\quarto.exe")
+
+
+class BuildError(Exception):
+    """A document's PDF did not end up where it was expected."""
 
 
 def find_quarto() -> str:
@@ -69,14 +73,19 @@ def build_one(config: Config, quarto: str, length: str, variant: str) -> Path:
     produced = qmd.with_suffix(".pdf")
     if produced.exists():
         produced.replace(pdf)
+    if not pdf.exists():
+        raise BuildError(
+            f"{length}/{variant}: quarto exited successfully but no PDF was found at {pdf}"
+        )
     return pdf
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--all", action="store_true", help="build every declared document")
-    parser.add_argument("--long", dest="length", action="store_const", const="long")
-    parser.add_argument("--short", dest="length", action="store_const", const="short")
+    length_group = parser.add_mutually_exclusive_group()
+    length_group.add_argument("--long", dest="length", action="store_const", const="long")
+    length_group.add_argument("--short", dest="length", action="store_const", const="short")
     parser.add_argument("--variant", help="build only this variant")
     parser.add_argument("--check", action="store_true", help="validate content, render nothing")
     args = parser.parse_args(argv)
@@ -88,6 +97,16 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
     if args.check:
+        problems: list[str] = []
+        for length, variant in config.all_documents():
+            try:
+                select(config, length, variant)
+            except SelectionError as exc:
+                problems.append(f"{length}/{variant}: {exc}")
+        if problems:
+            joined = "\n".join(f"  - {p}" for p in problems)
+            print(f"content is invalid:\n{joined}", file=sys.stderr)
+            return 1
         print(f"content is valid: {len(config.all_documents())} documents declared")
         return 0
 
@@ -99,12 +118,19 @@ def main(argv: list[str] | None = None) -> int:
         quarto = find_quarto()
         for length, variant in documents:
             print(f"building {length}/{variant}")
-            print(f"  wrote {build_one(config, quarto, length, variant)}")
+            try:
+                print(f"  wrote {build_one(config, quarto, length, variant)}")
+            except subprocess.CalledProcessError as exc:
+                print(
+                    f"quarto failed on {length}/{variant} with exit code {exc.returncode}",
+                    file=sys.stderr,
+                )
+                return 1
     except SelectionError as exc:
         print(f"cannot build: {exc}", file=sys.stderr)
         return 1
-    except subprocess.CalledProcessError as exc:
-        print(f"quarto failed with exit code {exc.returncode}", file=sys.stderr)
+    except BuildError as exc:
+        print(f"cannot build: {exc}", file=sys.stderr)
         return 1
     return 0
 
