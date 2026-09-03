@@ -52,6 +52,18 @@ def _filter_section(section: Section, length: str, variant: str) -> Section | No
     return replace(section, items=tuple(kept))
 
 
+def _get_section(config: Config, name: str, length: str, variant: str) -> Section:
+    """Fetch a section by name, or raise SelectionError with helpful message."""
+    try:
+        return config.sections[name]
+    except KeyError:
+        available = ", ".join(sorted(config.sections.keys()))
+        raise SelectionError(
+            f"variants.yml: document {length}/{variant} names section '{name}', "
+            f"but config.sections has no such section (available: {available})"
+        ) from None
+
+
 def select(config: Config, length: str, variant: str) -> Document:
     """Assemble one document, or raise SelectionError."""
     try:
@@ -62,7 +74,7 @@ def select(config: Config, length: str, variant: str) -> Document:
     sections = tuple(
         filtered
         for name in order
-        if (filtered := _filter_section(config.sections[name], length, variant)) is not None
+        if (filtered := _filter_section(_get_section(config, name, length, variant), length, variant)) is not None
     )
 
     tagline = next(

@@ -113,3 +113,20 @@ def test_no_surviving_tagline_raises():
         select(broken, "long", "general")
     assert "profile.yml" in str(excinfo.value)
     assert "long/general" in str(excinfo.value)
+
+
+def test_missing_section_in_document_order_raises():
+    config = build_config()
+    broken = Config(
+        config.profile,
+        config.sections,
+        {
+            "long": {"general": ("skills", "missing", "experience"), "gev-pos-1": ("experience", "skills")},
+            "short": {"general": ("skills", "experience")},
+        },
+    )
+    with pytest.raises(SelectionError) as excinfo:
+        select(broken, "long", "general")
+    assert "missing" in str(excinfo.value)
+    assert "long/general" in str(excinfo.value)
+    assert "awards" in str(excinfo.value) or "experience" in str(excinfo.value)
