@@ -20,9 +20,9 @@ short:
 
 def write(root: Path, awards: str, profile: str = PROFILE_PLACEHOLDER) -> Path:
     (root / "content").mkdir(parents=True, exist_ok=True)
-    (root / "variants.yml").write_text(VARIANTS, encoding="utf-8")
-    (root / "content" / "profile.yml").write_text(profile, encoding="utf-8")
-    (root / "content" / "awards.yml").write_text(awards, encoding="utf-8")
+    (root / "variants.yaml").write_text(VARIANTS, encoding="utf-8")
+    (root / "content" / "profile.yaml").write_text(profile, encoding="utf-8")
+    (root / "content" / "awards.yaml").write_text(awards, encoding="utf-8")
     return root
 
 
@@ -108,7 +108,7 @@ items:
     findings = lint(write(tmp_path, awards, profile=real))
     assert codes(findings) == ["real_contact_in_tracked_profile"]
     assert findings[0].path == "contact[0]"
-    assert "profile.local.yml" in findings[0].message
+    assert "profile.local.yaml" in findings[0].message
 
 
 def test_the_untracked_local_profile_is_never_linted(tmp_path):
@@ -120,7 +120,7 @@ items:
   - text: "An award"
 """
     root = write(tmp_path, awards)
-    (root / "content" / "profile.local.yml").write_text(
+    (root / "content" / "profile.local.yaml").write_text(
         'contact:\n  - "Email: [real@cornell.edu](mailto:real@cornell.edu)"\n', encoding="utf-8"
     )
     assert lint(root) == []

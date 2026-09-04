@@ -36,13 +36,13 @@ def test_line_index_survives_malformed_yaml():
 
 
 def test_problem_as_dict_omits_empty_fields():
-    bare = Problem(file="a.yml", code="empty_file", message="a.yml: empty file")
-    assert bare.as_dict() == {"file": "a.yml", "code": "empty_file", "message": "a.yml: empty file"}
+    bare = Problem(file="a.yaml", code="empty_file", message="a.yaml: empty file")
+    assert bare.as_dict() == {"file": "a.yaml", "code": "empty_file", "message": "a.yaml: empty file"}
 
     full = Problem(
-        file="a.yml",
+        file="a.yaml",
         code="missing_required_field",
-        message="a.yml: entry 0: missing required field 'org'",
+        message="a.yaml: entry 0: missing required field 'org'",
         line=4,
         path="entries[0]",
         field="org",

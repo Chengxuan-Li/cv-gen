@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Build PDF CVs from content/*.yml.
+"""Build PDF CVs from content/*.yaml.
 
     python build.py --all
     python build.py --long
@@ -35,7 +35,7 @@ from cvgen.select import SelectionError, select
 BUILD_DIR = Path(".build")
 OUT_DIR = Path("out")
 FALLBACK_QUARTO = Path(r"C:\Program Files\Quarto\bin\quarto.exe")
-LOCAL_PROFILE = "content/profile.local.yml"
+LOCAL_PROFILE = "content/profile.local.yaml"
 
 
 class BuildError(Exception):
@@ -218,7 +218,7 @@ def main(argv: list[str] | None = None) -> int:
             except SelectionError as exc:
                 problems.append(
                     Problem(
-                        file="variants.yml",
+                        file="variants.yaml",
                         code="no_surviving_tagline",
                         message=f"{length}/{variant}: {exc}",
                         path=f"{length}/{variant}",

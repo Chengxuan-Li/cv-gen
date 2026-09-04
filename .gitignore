@@ -2,7 +2,7 @@
 resources/
 
 # Per-machine overrides holding real contact details
-content/*.local.yml
+content/*.local.yaml
 
 # Generated intermediates and rendered output
 .build/

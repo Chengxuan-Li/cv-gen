@@ -33,8 +33,8 @@ from .spec import (
 ENTRY_FIELDS = BLOCKS["entries"].required_fields
 
 # Untracked per-machine overrides. Excluded from section discovery so that
-# content/profile.local.yml never becomes a section named "profile.local".
-LOCAL_SUFFIX = ".local.yml"
+# content/profile.local.yaml never becomes a section named "profile.local".
+LOCAL_SUFFIX = ".local.yaml"
 
 MARKER_HINT = (
     "a marker is '+' or '-' followed by a space, optionally with [variants]; "
@@ -43,7 +43,7 @@ MARKER_HINT = (
 
 
 def local_profile_path(profile_path: Path) -> Path:
-    """content/profile.yml -> content/profile.local.yml"""
+    """content/profile.yaml -> content/profile.local.yaml"""
     return profile_path.with_name(profile_path.stem + LOCAL_SUFFIX)
 
 
@@ -288,7 +288,7 @@ def _build_item(block: BlockSpec, values: dict) -> object:
 def _load_profile(
     path: Path, problems: list[Problem], sites: list[MarkerSite]
 ) -> Profile:
-    """Load profile.yml, letting an untracked profile.local.yml override it.
+    """Load profile.yaml, letting an untracked profile.local.yaml override it.
 
     The tracked file carries deliberately fake contact details; real ones live in
     the sibling `.local` file, which is gitignored. The merge is a shallow
@@ -405,22 +405,49 @@ def _load_documents(
     return documents
 
 
+def _legacy_extensions(root: Path) -> list[Problem]:
+    """Report `.yml` files that the loader will not see.
+
+    This project standardises on `.yaml`, which the YAML spec recommends. Since
+    discovery globs `*.yaml` only, a stray `.yml` would otherwise be ignored in
+    silence - the section would simply vanish from the CV, surfacing later as a
+    confusing 'no content file' error against variants.yaml. Naming it here turns
+    that into an obvious one-line fix.
+    """
+    stray = sorted((root / "content").glob("*.yml")) + sorted(root.glob("variants.yml"))
+    return [
+        Problem(
+            file=path.name,
+            code="legacy_yml_extension",
+            message=(
+                f"{path.name}: this project uses '.yaml', so this file is ignored "
+                f"by the loader"
+            ),
+            path=str(path.relative_to(root).as_posix()),
+            hint=f"rename it to {path.with_suffix('.yaml').name}",
+        )
+        for path in stray
+    ]
+
+
 def load(root: Path) -> Config:
     """Load every content file, or raise ValidationError listing all problems."""
     problems: list[Problem] = []
     sites: list[MarkerSite] = []
 
-    variants_path = root / "variants.yml"
+    variants_path = root / "variants.yaml"
     documents = _load_documents(variants_path, problems)
-    profile = _load_profile(root / "content" / "profile.yml", problems, sites)
+    profile = _load_profile(root / "content" / "profile.yaml", problems, sites)
 
     sections: dict[str, Section] = {}
-    for path in sorted((root / "content").glob("*.yml")):
+    for path in sorted((root / "content").glob("*.yaml")):
         if path.stem == "profile" or path.name.endswith(LOCAL_SUFFIX):
             continue
         section = _load_section(path, problems, sites)
         if section is not None:
             sections[section.name] = section
+
+    problems += _legacy_extensions(root)
 
     available = ", ".join(sorted(sections)) or "none"
     variants_source = Source(variants_path, {}, {})
@@ -435,7 +462,7 @@ def load(root: Path) -> Config:
                             f"which has no content file (available: {available})",
                             (length, "sections"),
                             field=name,
-                            hint=f"create content/{name}.yml, or remove it from variants.yml",
+                            hint=f"create content/{name}.yaml, or remove it from variants.yaml",
                         )
                     )
 
@@ -451,7 +478,7 @@ def load(root: Path) -> Config:
                         f"(declared: {', '.join(sorted(declared))})",
                         site.path,
                         field=target,
-                        hint="declare it under a length in variants.yml, or fix the spelling",
+                        hint="declare it under a length in variants.yaml, or fix the spelling",
                     )
                 )
 

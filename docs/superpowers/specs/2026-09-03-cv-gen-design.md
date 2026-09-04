@@ -17,9 +17,9 @@ rewriting. Section styling matches the reference style guide in `resources/`
 ## Architecture
 
 ```
-content/*.yml  ─┐
-variants.yml   ─┼─► build.py ──► .build/cv-<len>-<variant>.qmd ──► quarto ──► out/cv-<len>-<variant>.pdf
-profile.yml    ─┘   parse marker      markdown + fenced divs      cv.lua → cv.typ
+content/*.yaml  ─┐
+variants.yaml   ─┼─► build.py ──► .build/cv-<len>-<variant>.qmd ──► quarto ──► out/cv-<len>-<variant>.pdf
+profile.yaml    ─┘   parse marker      markdown + fenced divs      cv.lua → cv.typ
                     apply 2 gates
                     order sections
 ```
@@ -37,7 +37,7 @@ has no LaTeX dependency, and builds take well under a second.
 | Module | Responsibility | Depends on |
 |---|---|---|
 | `marker.py` | Parse a marker token into `(tier, only, text)`. Pure function, no I/O. | nothing |
-| `schema.py` | Load and validate `content/*.yml` and `variants.yml`. Owns every error message. | `marker` |
+| `schema.py` | Load and validate `content/*.yaml` and `variants.yaml`. Owns every error message. | `marker` |
 | `select.py` | Apply the two inclusion gates; order sections for a document. | `schema` |
 | `emit.py` | Render selected blocks to `.qmd` markdown. Decides only *how it is written*. | nothing |
 | `build.py` | CLI; wires the above; invokes `quarto render`. | all |
@@ -54,7 +54,7 @@ once. `select.py` never formats; `emit.py` never filters.
 
 ### Documents
 
-A **document** is a `(length, variant)` pair declared in `variants.yml`.
+A **document** is a `(length, variant)` pair declared in `variants.yaml`.
 `length` is `long` or `short`. Every document renders to
 `out/cv-<length>-<variant>.pdf`.
 
@@ -119,8 +119,8 @@ The item reaches `long/gev-pos-1` alone. `google-pos-1` is declared only under
 
 ### Block types
 
-Each `content/*.yml` declares a `type`, matching the four visual patterns in the
-style guide. The filename stem is the section's name in `variants.yml`.
+Each `content/*.yaml` declares a `type`, matching the four visual patterns in the
+style guide. The filename stem is the section's name in `variants.yaml`.
 
 | type | Used by | Renders as |
 |---|---|---|
@@ -130,7 +130,7 @@ style guide. The filename stem is the section's name in `variants.yml`.
 | `prose` | Publications | markdown paragraph with hanging indent |
 
 ```yaml
-# content/experience.yml
+# content/experience.yaml
 title: Experience
 type: entries
 entries:
@@ -156,13 +156,13 @@ container and its children. Child markers are evaluated only for surviving
 containers, and never widen a parent's reach.
 
 Sections themselves carry **no** marker: whether a section appears, and in what
-order, is decided entirely by `variants.yml`. This keeps document composition in
+order, is decided entirely by `variants.yaml`. This keeps document composition in
 one file rather than split across every content file.
 
 A section whose items are all filtered out is dropped along with its heading, so
 no empty ruled heading is ever rendered.
 
-### profile.yml
+### profile.yaml
 
 `name` and `contact` are constant across documents. `tagline` accepts either a
 plain string or a list of marked strings, in which case the **first item passing
@@ -179,15 +179,15 @@ tagline:
 ```
 
 Order matters: targeted taglines are listed before the unmarked fallback. If no
-tagline survives, that is a build error naming `profile.yml`.
+tagline survives, that is a build error naming `profile.yaml`.
 
 #### Keeping contact details out of the repository
 
-`content/profile.yml` is tracked and therefore public if the repository ever is.
+`content/profile.yaml` is tracked and therefore public if the repository ever is.
 Its contact values are **placeholders** chosen to look obviously fake
 (`you@example.com`, `+1 (555) 000-0000`). Real details live in an untracked
-sibling, `content/profile.local.yml`, matched by the gitignore rule
-`content/*.local.yml`.
+sibling, `content/profile.local.yaml`, matched by the gitignore rule
+`content/*.local.yaml`.
 
 The merge is a **shallow top-level key replacement**: a key present in the
 override replaces that key entirely. `contact:` therefore swaps the whole list —
@@ -201,15 +201,15 @@ guard against it, and both are load-bearing:
 
 1. The placeholders are unmistakable on sight. Realistic dummy values would be
    far more dangerous than obviously fake ones.
-2. Every run reports its source — `contact: content/profile.local.yml` when the
+2. Every run reports its source — `contact: content/profile.local.yaml` when the
    override is found, and a `WARNING: ... using PLACEHOLDER contact details` on
    stderr when it is not. The build still succeeds, because a fresh clone must
    work; the warning is what makes the fallback safe.
 
-`*.local.yml` files are excluded from section discovery, so `profile.local.yml`
+`*.local.yaml` files are excluded from section discovery, so `profile.local.yaml`
 never becomes a section named `profile.local`.
 
-### variants.yml
+### variants.yaml
 
 ```yaml
 long:
@@ -240,9 +240,9 @@ cv-gen/
   requirements.txt      pyyaml, pytest
   build.py              CLI entry point
   cvgen/                marker.py schema.py select.py emit.py
-  variants.yml
-  content/              profile.yml skills.yml experience.yml
-                        publications.yml awards.yml education.yml
+  variants.yaml
+  content/              profile.yaml skills.yaml experience.yaml
+                        publications.yaml awards.yaml education.yaml
   templates/            cv.typ  cv.lua
   tests/                test_marker.py test_select.py test_schema.py test_render.py
   .build/               generated .qmd (ignored)
@@ -279,13 +279,13 @@ one run surfaces every issue. Any error means a non-zero exit and no PDF written
 
 | Condition | Message contains |
 |---|---|
-| Variant name in `only`/`mark` declared nowhere in `variants.yml` | the name, its file and item index, and the declared variants |
+| Variant name in `only`/`mark` declared nowhere in `variants.yaml` | the name, its file and item index, and the declared variants |
 | Variant declared only under the other length | *nothing* — deliberate no-op |
-| Section in `variants.yml` with no `content/` file | the section and the available section names |
+| Section in `variants.yaml` with no `content/` file | the section and the available section names |
 | Unknown block `type` | the file and the four valid types |
 | Missing required field on an entry | file, item index, field name |
 | Malformed marker (unclosed `[`) | file, item index, the offending text |
-| No `tagline` survives both gates | `profile.yml` and the document being built |
+| No `tagline` survives both gates | `profile.yaml` and the document being built |
 | `quarto` not on PATH | `winget install Posit.Quarto` |
 
 ## Testing

@@ -42,26 +42,26 @@ def test_unknown_variant_lists_what_exists():
 
 def test_check_reports_validation_errors(tmp_path, capsys, monkeypatch):
     (tmp_path / "content").mkdir()
-    (tmp_path / "variants.yml").write_text("long:\n  sections: [skills]\n  variants:\n    general: {}\n", encoding="utf-8")
-    (tmp_path / "content" / "profile.yml").write_text("name: X\ntagline: T\n", encoding="utf-8")
+    (tmp_path / "variants.yaml").write_text("long:\n  sections: [skills]\n  variants:\n    general: {}\n", encoding="utf-8")
+    (tmp_path / "content" / "profile.yaml").write_text("name: X\ntagline: T\n", encoding="utf-8")
     monkeypatch.chdir(tmp_path)
     assert build.main(["--check"]) == 1
     assert "skills" in capsys.readouterr().err
 
 
 def test_check_catches_selection_errors_after_schema_passes(tmp_path, capsys, monkeypatch):
-    # Schema-valid content: variants.yml and profile.yml both parse fine, and
+    # Schema-valid content: variants.yaml and profile.yaml both parse fine, and
     # 'skills' has a content file, so load() alone would pass. But the tagline
     # is marked long-only ("+") while the only declared document is "short",
     # so no tagline survives select() for short/general.
     (tmp_path / "content").mkdir()
-    (tmp_path / "variants.yml").write_text(
+    (tmp_path / "variants.yaml").write_text(
         "short:\n  sections: [skills]\n  variants:\n    general: {}\n", encoding="utf-8"
     )
-    (tmp_path / "content" / "profile.yml").write_text(
+    (tmp_path / "content" / "profile.yaml").write_text(
         "name: X\ntagline: '+ T'\n", encoding="utf-8"
     )
-    (tmp_path / "content" / "skills.yml").write_text(
+    (tmp_path / "content" / "skills.yaml").write_text(
         "type: prose\nitems:\n  - some skill\n", encoding="utf-8"
     )
     monkeypatch.chdir(tmp_path)
@@ -115,11 +115,11 @@ items:
 
 def write_min_repo(root, local: str | None = None):
     (root / "content").mkdir(parents=True, exist_ok=True)
-    (root / "variants.yml").write_text(VARIANTS_MIN, encoding="utf-8")
-    (root / "content" / "profile.yml").write_text(PROFILE_MIN, encoding="utf-8")
-    (root / "content" / "skills.yml").write_text(SKILLS_MIN, encoding="utf-8")
+    (root / "variants.yaml").write_text(VARIANTS_MIN, encoding="utf-8")
+    (root / "content" / "profile.yaml").write_text(PROFILE_MIN, encoding="utf-8")
+    (root / "content" / "skills.yaml").write_text(SKILLS_MIN, encoding="utf-8")
     if local is not None:
-        (root / "content" / "profile.local.yml").write_text(local, encoding="utf-8")
+        (root / "content" / "profile.local.yaml").write_text(local, encoding="utf-8")
     return root
 
 
@@ -128,7 +128,7 @@ def test_warns_when_local_profile_is_missing(tmp_path, capsys, monkeypatch):
     assert build.main(["--check"]) == 0
     err = capsys.readouterr().err
     assert "WARNING" in err
-    assert "profile.local.yml" in err
+    assert "profile.local.yaml" in err
     assert "PLACEHOLDER" in err
 
 
@@ -138,7 +138,7 @@ def test_reports_source_when_local_profile_is_present(tmp_path, capsys, monkeypa
     assert build.main(["--check"]) == 0
     captured = capsys.readouterr()
     assert "WARNING" not in captured.err
-    assert "content/profile.local.yml" in captured.out
+    assert "content/profile.local.yaml" in captured.out
 
 
 def test_check_json_reports_documents_and_contact_source(tmp_path, capsys, monkeypatch):
@@ -148,12 +148,12 @@ def test_check_json_reports_documents_and_contact_source(tmp_path, capsys, monke
     payload = json.loads(capsys.readouterr().out)
     assert payload["ok"] is True
     assert payload["documents"] == ["short/general"]
-    assert payload["contact_source"] == "content/profile.local.yml"
+    assert payload["contact_source"] == "content/profile.local.yaml"
 
 
 def test_check_json_emits_structured_problems_with_codes(tmp_path, capsys, monkeypatch):
     root = write_min_repo(tmp_path)
-    (root / "content" / "skills.yml").write_text(
+    (root / "content" / "skills.yaml").write_text(
         "title: Skills\ntype: bogus\nitems: []\n", encoding="utf-8"
     )
     monkeypatch.chdir(root)
@@ -163,14 +163,14 @@ def test_check_json_emits_structured_problems_with_codes(tmp_path, capsys, monke
     codes = [p["code"] for p in payload["problems"]]
     assert "unknown_block_type" in codes
     problem = next(p for p in payload["problems"] if p["code"] == "unknown_block_type")
-    assert problem["file"] == "skills.yml"
+    assert problem["file"] == "skills.yaml"
     assert problem["line"] == 2
     assert problem["hint"]
 
 
 def test_lint_exits_nonzero_on_findings(tmp_path, capsys, monkeypatch):
     root = write_min_repo(tmp_path)
-    (root / "content" / "skills.yml").write_text(
+    (root / "content" / "skills.yaml").write_text(
         'title: Skills\ntype: labels\nitems:\n  - label: P\n    text: "+Python"\n',
         encoding="utf-8",
     )

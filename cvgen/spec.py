@@ -1,6 +1,6 @@
 """The content model, declared as data rather than as code.
 
-This table is the single source of truth for what a `content/*.yml` file may
+This table is the single source of truth for what a `content/*.yaml` file may
 contain. `schema.py` validates against it and `jsonschema.py` emits a JSON
 Schema from it, so the validator, the published schema and the documentation
 cannot drift apart - there is only one place to change.

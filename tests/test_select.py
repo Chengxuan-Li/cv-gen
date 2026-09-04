@@ -111,7 +111,7 @@ def test_no_surviving_tagline_raises():
     broken = Config(profile, config.sections, config.documents)
     with pytest.raises(SelectionError) as excinfo:
         select(broken, "long", "general")
-    assert "profile.yml" in str(excinfo.value)
+    assert "profile.yaml" in str(excinfo.value)
     assert "long/general" in str(excinfo.value)
 
 

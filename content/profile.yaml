@@ -3,7 +3,7 @@
 # are meant to look obviously fake, so they are unmistakable if one ever reaches
 # a rendered PDF.
 #
-# Put your real email and phone in content/profile.local.yml, which is
+# Put your real email and phone in content/profile.local.yaml, which is
 # gitignored. That file shallow-overrides top-level keys here, so it usually
 # needs nothing but a `contact:` block. The build prints a warning on every run
 # when it is missing.

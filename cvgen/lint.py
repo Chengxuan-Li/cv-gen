@@ -53,10 +53,10 @@ def _scalars(text: str) -> list[tuple[tuple, str, int]]:
 def _linted_files(root: Path) -> list[Path]:
     files = [
         p
-        for p in sorted((root / "content").glob("*.yml"))
+        for p in sorted((root / "content").glob("*.yaml"))
         if not p.name.endswith(LOCAL_SUFFIX)
     ]
-    variants = root / "variants.yml"
+    variants = root / "variants.yaml"
     if variants.exists():
         files.append(variants)
     return files
@@ -122,7 +122,7 @@ def lint(root: Path) -> list[Problem]:
     for path in _linted_files(root):
         findings += _near_miss_markers(path)
 
-    profile = root / "content" / "profile.yml"
+    profile = root / "content" / "profile.yaml"
     if profile.exists():
         findings += _real_contact(profile)
     return findings

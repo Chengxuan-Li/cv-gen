@@ -17,13 +17,13 @@ pip install -r requirements.txt
 
 ### Contact details
 
-`content/profile.yml` is tracked and carries **placeholder** contact details
+`content/profile.yaml` is tracked and carries **placeholder** contact details
 (`you@example.com`, `+1 (555) 000-0000`). Real ones go in
-`content/profile.local.yml`, which is gitignored so your phone number never
+`content/profile.local.yaml`, which is gitignored so your phone number never
 enters the repository:
 
 ```yaml
-# content/profile.local.yml
+# content/profile.local.yaml
 contact:
   - "Email: [you@real.edu](mailto:you@real.edu)"
   - "Phone: +1 (555) 123 4567"
@@ -31,20 +31,20 @@ contact:
 
 The override is a **shallow top-level merge**: any key present replaces that key
 entirely, so `contact:` swaps the whole list and everything else falls through
-from `profile.yml`. You can override `name` or `tagline` the same way.
+from `profile.yaml`. You can override `name` or `tagline` the same way.
 
 This is the one manual step a fresh clone needs. Without it the build still
 succeeds, so it warns on every run:
 
 ```
-WARNING: content/profile.local.yml not found - using PLACEHOLDER contact details
+WARNING: content/profile.local.yaml not found - using PLACEHOLDER contact details
 ```
 
 Take that warning seriously — it means the PDF you are about to send has a fake
 phone number on it. When the override is found, the build names it instead:
 
 ```
-contact: content/profile.local.yml
+contact: content/profile.local.yaml
 ```
 
 ## Build
@@ -79,7 +79,7 @@ short/general: 15 of 17 items included
 
 `--lint` catches the two failure modes that pass validation and still produce a
 wrong document: a near-miss marker (`+Design…` with no space), and real contact
-details sitting in the tracked `profile.yml`.
+details sitting in the tracked `profile.yaml`.
 
 Add `--json` to any of these for machine-readable output. Under `--json`,
 **stdout carries only the JSON document** — warnings go to stderr — so it can be
@@ -95,8 +95,17 @@ code, not the prose — messages may be reworded, codes will not be.
 
 ## Writing content
 
-Content lives in `content/*.yml`. Prose fields are **markdown**, so `**bold**`,
+Content lives in `content/*.yaml`. Prose fields are **markdown**, so `**bold**`,
 `*italic*`, and `[text](url)` work throughout.
+
+The extension is `.yaml`, not `.yml` — [the YAML spec recommends
+it](https://yaml.org/faq.html), and discovery globs `*.yaml` only. A stray `.yml`
+would otherwise be ignored in silence, so the build reports it instead:
+
+```
+content is invalid:
+  - awards.yml: this project uses '.yaml', so this file is ignored by the loader
+```
 
 ### The marker
 
@@ -164,7 +173,7 @@ A marker on an entry removes the whole entry and its bullets when it fails.
 ### Block types
 
 Each content file declares a `type`, matching one visual pattern. The filename
-stem is the section's name in `variants.yml`.
+stem is the section's name in `variants.yaml`.
 
 | type | Used by | Renders as |
 |---|---|---|
@@ -184,7 +193,7 @@ items:
 
 ## Adding a variant
 
-Declare it in `variants.yml` under whichever lengths should build it:
+Declare it in `variants.yaml` under whichever lengths should build it:
 
 ```yaml
 long:
@@ -221,9 +230,9 @@ cvgen/
   lint.py        semantic mistakes no schema can catch
   diagnostics.py Problem, stable codes, YAML line anchoring
   jsonschema.py  emits schema/*.json from spec.py
-variants.yml     which documents exist, and their section order
-content/         profile.yml + one file per section
-                 profile.local.yml — real contact details, gitignored
+variants.yaml     which documents exist, and their section order
+content/         profile.yaml + one file per section
+                 profile.local.yaml — real contact details, gitignored
 schema/          generated JSON Schema — do not hand-edit
 templates/       cv.typ (all styling)  cv.lua (markdown → Typst bridge)
 tests/           pytest suite

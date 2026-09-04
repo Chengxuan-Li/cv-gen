@@ -10,8 +10,8 @@ Last reviewed: 2026-09-04.
 
 ## 1. Content is untiered — `short` and `long` differ only by section
 
-**State:** every item in `content/*.yml` is unmarked, so it appears in both
-lengths. The two CVs differ only because `variants.yml` gives `short` three
+**State:** every item in `content/*.yaml` is unmarked, so it appears in both
+lengths. The two CVs differ only because `variants.yaml` gives `short` three
 sections and `long` five. The marker machinery is fully built and tested but
 unexercised on real content.
 
@@ -23,9 +23,9 @@ owner's call. It was three markers:
 
 | Where | Marker | Rationale |
 |---|---|---|
-| `content/experience.yml`, EnergyAtlas.io, the "Design core simulation, geometry, data, and visualization architecture…" bullet | prefix `+ ` | Longest bullet at three lines; elaborates *how* the bullet above it was achieved, which already states the outcome. |
-| `content/experience.yml`, `Urban Systems Design MEP Engineers` entry | `mark: "+"` | A three-month 2023 internship, the oldest and least aligned item with the PhD/software trajectory. |
-| `content/education.yml`, `BA (Hons)` entry | `mark: "+"` | Superseded by the M.Arch from the same institution. |
+| `content/experience.yaml`, EnergyAtlas.io, the "Design core simulation, geometry, data, and visualization architecture…" bullet | prefix `+ ` | Longest bullet at three lines; elaborates *how* the bullet above it was achieved, which already states the outcome. |
+| `content/experience.yaml`, `Urban Systems Design MEP Engineers` entry | `mark: "+"` | A three-month 2023 internship, the oldest and least aligned item with the PhD/software trajectory. |
+| `content/education.yaml`, `BA (Hons)` entry | `mark: "+"` | Superseded by the M.Arch from the same institution. |
 
 The Urban Systems one is the contested one: it is the only industry consulting
 role and carries CBRE and Google as recognisable names, which may outweigh the
@@ -77,7 +77,7 @@ Two contracts established while building it, both easy to break by accident:
   against real content; the build itself never imports it.
 
 One thing deliberately *not* required in the JSON Schema: `name` in
-`cv-profile.schema.json`. `content/profile.local.yml` is a partial override by
+`cv-profile.schema.json`. `content/profile.local.yaml` is a partial override by
 design, so requiring it there would flag a correct file. `name` is enforced
 after the merge, at load time, which is the only point where it can be.
 
@@ -116,11 +116,11 @@ decision, not an oversight and not a defect.
 
 **Do not raise it again.** Do not propose `git filter-repo`, do not suggest
 changing repository visibility, and do not treat the placeholder mechanism in
-`content/profile.yml` as broken because real values exist in history — it works
+`content/profile.yaml` as broken because real values exist in history — it works
 as designed and prevents *future* commits from adding more.
 
 The one rule that still binds: real contact details belong in the untracked
-`content/profile.local.yml`, never in the tracked `content/profile.yml`.
+`content/profile.local.yaml`, never in the tracked `content/profile.yaml`.
 `python build.py --lint` enforces it.
 
 ---

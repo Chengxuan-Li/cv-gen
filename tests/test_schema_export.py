@@ -42,7 +42,7 @@ def test_each_schema_is_itself_valid(name):
     "path",
     sorted(
         p
-        for p in (ROOT / "content").glob("*.yml")
+        for p in (ROOT / "content").glob("*.yaml")
         if p.stem != "profile" and not p.name.endswith(LOCAL_SUFFIX)
     ),
 )
@@ -52,12 +52,12 @@ def test_real_section_files_validate(path):
 
 def test_real_profile_validates():
     jsonschema.validate(
-        load_yaml(ROOT / "content" / "profile.yml"), committed("cv-profile.schema.json")
+        load_yaml(ROOT / "content" / "profile.yaml"), committed("cv-profile.schema.json")
     )
 
 
 def test_real_variants_file_validates():
-    jsonschema.validate(load_yaml(ROOT / "variants.yml"), committed("cv-variants.schema.json"))
+    jsonschema.validate(load_yaml(ROOT / "variants.yaml"), committed("cv-variants.schema.json"))
 
 
 def test_every_block_type_is_represented():

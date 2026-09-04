@@ -74,7 +74,7 @@ def explain(config: Config, length: str, variant: str) -> list[Decision]:
     try:
         order = config.documents[length][variant]
     except KeyError:
-        raise SelectionError(f"variants.yml declares no document {length}/{variant}") from None
+        raise SelectionError(f"variants.yaml declares no document {length}/{variant}") from None
 
     out: list[Decision] = []
     for name in order:

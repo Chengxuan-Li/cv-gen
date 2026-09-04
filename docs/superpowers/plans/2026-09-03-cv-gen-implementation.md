@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build a generator that turns `content/*.yml` into PDF CVs, one per declared (length, variant) document, rendered through Quarto's Typst engine.
+**Goal:** Build a generator that turns `content/*.yaml` into PDF CVs, one per declared (length, variant) document, rendered through Quarto's Typst engine.
 
 **Architecture:** A pure-Python pipeline — `marker` parses the tier/variant token, `schema` loads and validates YAML, `select` applies two inclusion gates and orders sections, `emit` writes a `.qmd` of markdown and fenced divs. A Lua filter converts those divs into Typst function calls so markdown survives Pandoc; all styling lives in one `.typ` file. `build.py` wires it together and shells out to Quarto.
 
@@ -30,14 +30,14 @@ Every task's requirements implicitly include these.
 |---|---|
 | `cvgen/__init__.py` | Package marker; exports nothing. |
 | `cvgen/marker.py` | Marker token → `(tier, only, text)`. Pure; no I/O, no YAML. |
-| `cvgen/schema.py` | Load and validate `variants.yml`, `profile.yml`, `content/*.yml`. Owns every load-time error message. |
+| `cvgen/schema.py` | Load and validate `variants.yaml`, `profile.yaml`, `content/*.yaml`. Owns every load-time error message. |
 | `cvgen/select.py` | The two inclusion gates; section ordering; empty-section dropping. Never formats. |
 | `cvgen/emit.py` | `Document` → `.qmd` text. Never filters. |
 | `build.py` | CLI, Quarto discovery and invocation. |
 | `templates/cv.typ` | All styling. Injected via `include-in-header`. |
 | `templates/cv.lua` | Fenced div → Typst call. The only bridge between content and style. |
-| `variants.yml` | Which documents exist and their section order. |
-| `content/*.yml` | Profile and one file per section. |
+| `variants.yaml` | Which documents exist and their section order. |
+| `content/*.yaml` | Profile and one file per section. |
 | `tests/test_*.py` | One test module per `cvgen` module, plus an end-to-end render test. |
 
 ---
@@ -329,10 +329,10 @@ entries:
 
 def write_repo(root: Path, **overrides: str) -> Path:
     files = {
-        "variants.yml": VARIANTS,
-        "content/profile.yml": PROFILE,
-        "content/skills.yml": SKILLS,
-        "content/experience.yml": EXPERIENCE,
+        "variants.yaml": VARIANTS,
+        "content/profile.yaml": PROFILE,
+        "content/skills.yaml": SKILLS,
+        "content/experience.yaml": EXPERIENCE,
     }
     files.update(overrides)
     for name, text in files.items():
@@ -380,10 +380,10 @@ def test_taglines_keep_order(tmp_path):
 def test_undeclared_variant_is_an_error(tmp_path):
     bad = EXPERIENCE.replace("+[gev-pos-1]", "+[gev-pos-9]")
     with pytest.raises(ValidationError) as excinfo:
-        load(write_repo(tmp_path, **{"content/experience.yml": bad}))
+        load(write_repo(tmp_path, **{"content/experience.yaml": bad}))
     message = str(excinfo.value)
     assert "gev-pos-9" in message
-    assert "experience.yml" in message
+    assert "experience.yaml" in message
     assert "gev-pos-1" in message  # lists what IS declared
 
 
@@ -391,13 +391,13 @@ def test_variant_declared_under_other_length_is_not_an_error(tmp_path):
     # google-pos-1 exists only under `short`; targeting it from a `+` item is a
     # deliberate no-op, not a typo.
     ok = EXPERIENCE.replace("+[gev-pos-1]", "+[google-pos-1]")
-    load(write_repo(tmp_path, **{"content/experience.yml": ok}))
+    load(write_repo(tmp_path, **{"content/experience.yaml": ok}))
 
 
 def test_missing_section_file_is_an_error(tmp_path):
     bad = VARIANTS.replace("sections: [skills, experience]", "sections: [skills, awards]")
     with pytest.raises(ValidationError) as excinfo:
-        load(write_repo(tmp_path, **{"variants.yml": bad}))
+        load(write_repo(tmp_path, **{"variants.yaml": bad}))
     message = str(excinfo.value)
     assert "awards" in message
     assert "experience" in message  # lists what IS available
@@ -406,11 +406,11 @@ def test_missing_section_file_is_an_error(tmp_path):
 def test_unknown_block_type_is_an_error(tmp_path):
     bad = SKILLS.replace("type: labels", "type: bullets")
     with pytest.raises(ValidationError) as excinfo:
-        load(write_repo(tmp_path, **{"content/skills.yml": bad}))
+        load(write_repo(tmp_path, **{"content/skills.yaml": bad}))
     message = str(excinfo.value)
     assert "bullets" in message
     assert "labels" in message
-    assert "skills.yml" in message
+    assert "skills.yaml" in message
 
 
 def test_missing_entry_field_is_an_error(tmp_path):
@@ -423,7 +423,7 @@ entries:
     role: Lead Developer
 """
     with pytest.raises(ValidationError) as excinfo:
-        load(write_repo(tmp_path, **{"content/experience.yml": bad}))
+        load(write_repo(tmp_path, **{"content/experience.yaml": bad}))
     message = str(excinfo.value)
     assert "'org'" in message
     assert "entry 0" in message
@@ -432,7 +432,7 @@ entries:
 def test_malformed_marker_is_an_error(tmp_path):
     bad = EXPERIENCE.replace("+[gev-pos-1] Build", "+[gev-pos-1 Build")
     with pytest.raises(ValidationError) as excinfo:
-        load(write_repo(tmp_path, **{"content/experience.yml": bad}))
+        load(write_repo(tmp_path, **{"content/experience.yaml": bad}))
     assert "unclosed" in str(excinfo.value).lower()
 
 
@@ -443,7 +443,7 @@ def test_all_problems_reported_in_one_pass(tmp_path):
         load(
             write_repo(
                 tmp_path,
-                **{"content/skills.yml": bad_skills, "content/experience.yml": bad_experience},
+                **{"content/skills.yaml": bad_skills, "content/experience.yaml": bad_experience},
             )
         )
     assert len(excinfo.value.problems) >= 2
@@ -670,9 +670,9 @@ def _load_documents(path: Path, problems: list[str]) -> dict[str, dict[str, tupl
 def _markers(config_sections: dict[str, Section], profile: Profile):
     """Yield (marker, where) for every marker in the content."""
     for item in profile.taglines:
-        yield item.marker, "profile.yml"
+        yield item.marker, "profile.yaml"
     for section in config_sections.values():
-        where = f"{section.name}.yml"
+        where = f"{section.name}.yaml"
         for index, item in enumerate(section.items):
             yield item.marker, f"{where}: item {index}"
             for bullet_index, bullet in enumerate(getattr(item, "bullets", ())):
@@ -683,11 +683,11 @@ def load(root: Path) -> Config:
     """Load every content file, or raise ValidationError listing all problems."""
     problems: list[str] = []
 
-    documents = _load_documents(root / "variants.yml", problems)
-    profile = _load_profile(root / "content" / "profile.yml", problems)
+    documents = _load_documents(root / "variants.yaml", problems)
+    profile = _load_profile(root / "content" / "profile.yaml", problems)
 
     sections: dict[str, Section] = {}
-    for path in sorted((root / "content").glob("*.yml")):
+    for path in sorted((root / "content").glob("*.yaml")):
         if path.stem == "profile":
             continue
         section = _load_section(path, problems)
@@ -700,7 +700,7 @@ def load(root: Path) -> Config:
             for name in order:
                 if name not in sections:
                     problems.append(
-                        f"variants.yml: {length}/{variant} lists section {name!r}, "
+                        f"variants.yaml: {length}/{variant} lists section {name!r}, "
                         f"which has no content file (available: {available})"
                     )
 
@@ -867,7 +867,7 @@ def test_no_surviving_tagline_raises():
     broken = Config(profile, config.sections, config.documents)
     with pytest.raises(SelectionError) as excinfo:
         select(broken, "long", "general")
-    assert "profile.yml" in str(excinfo.value)
+    assert "profile.yaml" in str(excinfo.value)
     assert "long/general" in str(excinfo.value)
 ```
 
@@ -940,7 +940,7 @@ def select(config: Config, length: str, variant: str) -> Document:
     try:
         order = config.documents[length][variant]
     except KeyError:
-        raise SelectionError(f"variants.yml declares no document {length}/{variant}") from None
+        raise SelectionError(f"variants.yaml declares no document {length}/{variant}") from None
 
     sections = tuple(
         filtered
@@ -953,7 +953,7 @@ def select(config: Config, length: str, variant: str) -> Document:
     )
     if tagline is None:
         raise SelectionError(
-            f"profile.yml: no tagline survives for document {length}/{variant}"
+            f"profile.yaml: no tagline survives for document {length}/{variant}"
         )
 
     return Document(
@@ -1437,8 +1437,8 @@ def test_unknown_variant_lists_what_exists():
 
 def test_check_reports_validation_errors(tmp_path, capsys, monkeypatch):
     (tmp_path / "content").mkdir()
-    (tmp_path / "variants.yml").write_text("long:\n  sections: [skills]\n  variants:\n    general: {}\n", encoding="utf-8")
-    (tmp_path / "content" / "profile.yml").write_text("name: X\ntagline: T\n", encoding="utf-8")
+    (tmp_path / "variants.yaml").write_text("long:\n  sections: [skills]\n  variants:\n    general: {}\n", encoding="utf-8")
+    (tmp_path / "content" / "profile.yaml").write_text("name: X\ntagline: T\n", encoding="utf-8")
     monkeypatch.chdir(tmp_path)
     assert build.main(["--check"]) == 1
     assert "skills" in capsys.readouterr().err
@@ -1455,7 +1455,7 @@ Create `build.py`:
 
 ```python
 #!/usr/bin/env python
-"""Build PDF CVs from content/*.yml.
+"""Build PDF CVs from content/*.yaml.
 
     python build.py --all
     python build.py --long
@@ -1589,7 +1589,7 @@ Quarto is not on PATH in every shell."
 ### Task 7: Seed content and verify end to end
 
 **Files:**
-- Create: `variants.yml`, `content/profile.yml`, `content/skills.yml`, `content/experience.yml`, `content/publications.yml`, `content/awards.yml`, `content/education.yml`
+- Create: `variants.yaml`, `content/profile.yaml`, `content/skills.yaml`, `content/experience.yaml`, `content/publications.yaml`, `content/awards.yaml`, `content/education.yaml`
 - Modify: `README.md` (drop the Status line)
 - Test: `tests/test_render.py`
 
@@ -1598,7 +1598,7 @@ Quarto is not on PATH in every shell."
 
 **Content rule:** transcribe from `resources/cv-content-ref.docx` **unmarked**, so short and long start identical. Adding `+` markers is the owner's judgment call about their own record — do not invent tiers. Read `resources/` but never copy it into the repo and never let the build read from it.
 
-- [ ] **Step 1: Write `variants.yml`**
+- [ ] **Step 1: Write `variants.yaml`**
 
 Variant names are placeholders; only `general` is real. Ship the example commented out so no fictitious employer names sit in the repo.
 
@@ -1623,7 +1623,7 @@ short:
 
 - [ ] **Step 2: Write the content files**
 
-`content/profile.yml`:
+`content/profile.yaml`:
 
 ```yaml
 name: Chengxuan Li
@@ -1636,7 +1636,7 @@ tagline:
   - PhD Candidate in Systems Engineering, Minor in Electrical & Computer Engineering
 ```
 
-`content/skills.yml`:
+`content/skills.yaml`:
 
 ```yaml
 title: Technical Skills
@@ -1657,7 +1657,7 @@ items:
       flexibility assessment
 ```
 
-`content/experience.yml`:
+`content/experience.yaml`:
 
 ```yaml
 title: Experience
@@ -1689,7 +1689,7 @@ entries:
       - Conduct sustainability assessment with **CBRE GWS** for 13+ **Google** workplace properties in the Americas.
 ```
 
-`content/publications.yml`:
+`content/publications.yaml`:
 
 ```yaml
 title: Selected Publications
@@ -1715,7 +1715,7 @@ items:
     [DOI: 10.1080/19401493.2025.2536261](https://doi.org/10.1080/19401493.2025.2536261)
 ```
 
-`content/awards.yml`:
+`content/awards.yaml`:
 
 ```yaml
 title: Awards & Grants
@@ -1735,7 +1735,7 @@ items:
     date: Oct 2025
 ```
 
-`content/education.yml`:
+`content/education.yaml`:
 
 ```yaml
 title: Education
@@ -1847,11 +1847,11 @@ Expected: `resources/` appears nowhere in `git status`; `check-ignore` reports `
 - [ ] **Step 9: Commit**
 
 ```bash
-git add variants.yml content/ tests/test_render.py README.md
+git add variants.yaml content/ tests/test_render.py README.md
 git commit -m "Seed content and verify end to end
 
 Content is transcribed unmarked, so short and long start identical; tiering
-is the owner's call. variants.yml ships with general only, with the variant
+is the owner's call. variants.yaml ships with general only, with the variant
 example commented out."
 ```
 
@@ -1859,7 +1859,7 @@ example commented out."
 
 ## Self-Review
 
-**Spec coverage.** Every spec section maps to a task: marker grammar and its collision table → Task 1; block types, `variants.yml`, all load-time errors → Task 2; the two gates, `general` inheritance, empty-section dropping, tagline selection → Task 3; the div contract → Task 4; the four block renderings and Typst styling → Task 5; the CLI, Quarto discovery, and its errors → Task 6; content seeding and the render smoke test → Task 7.
+**Spec coverage.** Every spec section maps to a task: marker grammar and its collision table → Task 1; block types, `variants.yaml`, all load-time errors → Task 2; the two gates, `general` inheritance, empty-section dropping, tagline selection → Task 3; the div contract → Task 4; the four block renderings and Typst styling → Task 5; the CLI, Quarto discovery, and its errors → Task 6; content seeding and the render smoke test → Task 7.
 
 **Interface consistency.** `Marker`/`Marked`/`parse_item`/`parse_mark` (Task 1) are consumed under those exact names in Tasks 2 and 3. `Item`/`Label`/`Entry`/`Section`/`Profile`/`Config` (Task 2) are used unchanged in Tasks 3, 4 and 6. `Document`'s field names (Task 3) match every access in Task 4. The div classes and the `dates` attribute emitted in Task 4 match the Lua filter's branches in Task 5 exactly, and both match the Typst function signatures `cv-head(left:, right:)`, `cv-entry(dates:)`, `cv-row(dates:)`, `cv-prose(body)`, `cv-labels(body)`.
 

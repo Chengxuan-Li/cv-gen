@@ -93,7 +93,7 @@ def section_schema() -> dict:
         "$id": "cv-section.schema.json",
         "title": "cv-gen section file",
         "description": (
-            "One content/*.yml section file. The 'type' key selects which shape "
+            "One content/*.yaml section file. The 'type' key selects which shape "
             "applies. Structure only - marker semantics are not expressible here."
         ),
         "type": "object",
@@ -108,7 +108,7 @@ def profile_schema() -> dict:
         "$id": "cv-profile.schema.json",
         "title": "cv-gen profile file",
         "description": (
-            "content/profile.yml, and the untracked content/profile.local.yml that "
+            "content/profile.yaml, and the untracked content/profile.local.yaml that "
             "shallow-overrides its top-level keys. No key is required here, because "
             "the override file is partial by design - 'name' is enforced after the "
             "merge, at load time, which is the only point where it can be."
@@ -140,7 +140,7 @@ def variants_schema() -> dict:
         "$schema": DRAFT,
         "$id": "cv-variants.schema.json",
         "title": "cv-gen variants file",
-        "description": "variants.yml: which (length, variant) documents exist.",
+        "description": "variants.yaml: which (length, variant) documents exist.",
         "type": "object",
         "properties": {
             length: {

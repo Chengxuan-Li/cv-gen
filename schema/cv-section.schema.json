@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "cv-section.schema.json",
   "title": "cv-gen section file",
-  "description": "One content/*.yml section file. The 'type' key selects which shape applies. Structure only - marker semantics are not expressible here.",
+  "description": "One content/*.yaml section file. The 'type' key selects which shape applies. Structure only - marker semantics are not expressible here.",
   "type": "object",
   "oneOf": [
     {

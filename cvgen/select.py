@@ -59,7 +59,7 @@ def _get_section(config: Config, name: str, length: str, variant: str) -> Sectio
     except KeyError:
         available = ", ".join(sorted(config.sections.keys()))
         raise SelectionError(
-            f"variants.yml: document {length}/{variant} names section '{name}', "
+            f"variants.yaml: document {length}/{variant} names section '{name}', "
             f"but config.sections has no such section (available: {available})"
         ) from None
 
@@ -69,7 +69,7 @@ def select(config: Config, length: str, variant: str) -> Document:
     try:
         order = config.documents[length][variant]
     except KeyError:
-        raise SelectionError(f"variants.yml declares no document {length}/{variant}") from None
+        raise SelectionError(f"variants.yaml declares no document {length}/{variant}") from None
 
     sections = tuple(
         filtered
@@ -82,7 +82,7 @@ def select(config: Config, length: str, variant: str) -> Document:
     )
     if tagline is None:
         raise SelectionError(
-            f"profile.yml: no tagline survives for document {length}/{variant}"
+            f"profile.yaml: no tagline survives for document {length}/{variant}"
         )
 
     return Document(

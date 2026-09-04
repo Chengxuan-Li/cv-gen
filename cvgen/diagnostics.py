@@ -36,6 +36,7 @@ CODES = (
     "missing_section_file",
     "no_sections_listed",
     "no_documents_declared",
+    "legacy_yml_extension",
     # Selection, raised at build time rather than load time
     "no_surviving_tagline",
     "unknown_document",

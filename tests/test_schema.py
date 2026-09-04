@@ -74,10 +74,10 @@ items:
 
 def write_repo(root: Path, **overrides: str) -> Path:
     files = {
-        "variants.yml": VARIANTS,
-        "content/profile.yml": PROFILE,
-        "content/skills.yml": SKILLS,
-        "content/experience.yml": EXPERIENCE,
+        "variants.yaml": VARIANTS,
+        "content/profile.yaml": PROFILE,
+        "content/skills.yaml": SKILLS,
+        "content/experience.yaml": EXPERIENCE,
     }
     files.update(overrides)
     for name, text in files.items():
@@ -125,10 +125,10 @@ def test_taglines_keep_order(tmp_path):
 def test_undeclared_variant_is_an_error(tmp_path):
     bad = EXPERIENCE.replace("+[gev-pos-1]", "+[gev-pos-9]")
     with pytest.raises(ValidationError) as excinfo:
-        load(write_repo(tmp_path, **{"content/experience.yml": bad}))
+        load(write_repo(tmp_path, **{"content/experience.yaml": bad}))
     message = str(excinfo.value)
     assert "gev-pos-9" in message
-    assert "experience.yml" in message
+    assert "experience.yaml" in message
     assert "gev-pos-1" in message  # lists what IS declared
 
 
@@ -136,13 +136,13 @@ def test_variant_declared_under_other_length_is_not_an_error(tmp_path):
     # google-pos-1 exists only under `short`; targeting it from a `+` item is a
     # deliberate no-op, not a typo.
     ok = EXPERIENCE.replace("+[gev-pos-1]", "+[google-pos-1]")
-    load(write_repo(tmp_path, **{"content/experience.yml": ok}))
+    load(write_repo(tmp_path, **{"content/experience.yaml": ok}))
 
 
 def test_missing_section_file_is_an_error(tmp_path):
     bad = VARIANTS.replace("sections: [skills, experience]", "sections: [skills, awards]")
     with pytest.raises(ValidationError) as excinfo:
-        load(write_repo(tmp_path, **{"variants.yml": bad}))
+        load(write_repo(tmp_path, **{"variants.yaml": bad}))
     message = str(excinfo.value)
     assert "awards" in message
     assert "experience" in message  # lists what IS available
@@ -151,11 +151,11 @@ def test_missing_section_file_is_an_error(tmp_path):
 def test_unknown_block_type_is_an_error(tmp_path):
     bad = SKILLS.replace("type: labels", "type: bullets")
     with pytest.raises(ValidationError) as excinfo:
-        load(write_repo(tmp_path, **{"content/skills.yml": bad}))
+        load(write_repo(tmp_path, **{"content/skills.yaml": bad}))
     message = str(excinfo.value)
     assert "bullets" in message
     assert "labels" in message
-    assert "skills.yml" in message
+    assert "skills.yaml" in message
 
 
 def test_missing_entry_field_is_an_error(tmp_path):
@@ -168,7 +168,7 @@ entries:
     role: Lead Developer
 """
     with pytest.raises(ValidationError) as excinfo:
-        load(write_repo(tmp_path, **{"content/experience.yml": bad}))
+        load(write_repo(tmp_path, **{"content/experience.yaml": bad}))
     message = str(excinfo.value)
     assert "'org'" in message
     assert "entry 0" in message
@@ -177,7 +177,7 @@ entries:
 def test_malformed_marker_is_an_error(tmp_path):
     bad = EXPERIENCE.replace("+[gev-pos-1] Build", "+[gev-pos-1 Build")
     with pytest.raises(ValidationError) as excinfo:
-        load(write_repo(tmp_path, **{"content/experience.yml": bad}))
+        load(write_repo(tmp_path, **{"content/experience.yaml": bad}))
     assert "unclosed" in str(excinfo.value).lower()
 
 
@@ -188,7 +188,7 @@ def test_all_problems_reported_in_one_pass(tmp_path):
         load(
             write_repo(
                 tmp_path,
-                **{"content/skills.yml": bad_skills, "content/experience.yml": bad_experience},
+                **{"content/skills.yaml": bad_skills, "content/experience.yaml": bad_experience},
             )
         )
     assert len(excinfo.value.problems) >= 2
@@ -197,14 +197,14 @@ def test_all_problems_reported_in_one_pass(tmp_path):
 def test_yaml_list_at_top_level_is_an_error(tmp_path):
     bad_skills = "- foo\n- bar"
     with pytest.raises(ValidationError) as excinfo:
-        load(write_repo(tmp_path, **{"content/skills.yml": bad_skills}))
+        load(write_repo(tmp_path, **{"content/skills.yaml": bad_skills}))
     message = str(excinfo.value)
-    assert "skills.yml" in message
+    assert "skills.yaml" in message
     assert "list" in message.lower() or "mapping" in message.lower()
 
 
 def test_rows_item_marker_and_date_are_parsed(tmp_path):
-    config = load(write_repo(tmp_path, **{"content/awards.yml": AWARDS}))
+    config = load(write_repo(tmp_path, **{"content/awards.yaml": AWARDS}))
     item = config.sections["awards"].items[0]
     assert item.marker.tier == "long"
     assert item.marker.only == ("gev-pos-1",)
@@ -213,7 +213,7 @@ def test_rows_item_marker_and_date_are_parsed(tmp_path):
 
 
 def test_prose_item_marker_is_parsed(tmp_path):
-    config = load(write_repo(tmp_path, **{"content/summary.yml": PROSE}))
+    config = load(write_repo(tmp_path, **{"content/summary.yaml": PROSE}))
     item = config.sections["summary"].items[0]
     assert item.marker.tier == "long"
     assert item.marker.only == ("gev-pos-1",)
@@ -221,7 +221,7 @@ def test_prose_item_marker_is_parsed(tmp_path):
 
 
 def test_label_item_marker_is_parsed_not_default(tmp_path):
-    config = load(write_repo(tmp_path, **{"content/skills.yml": SKILLS_WITH_MARKER}))
+    config = load(write_repo(tmp_path, **{"content/skills.yaml": SKILLS_WITH_MARKER}))
     label = config.sections["skills"].items[0]
     assert label.marker.tier == "long"
     assert label.marker.only == ("gev-pos-1",)
@@ -232,9 +232,9 @@ def test_label_item_marker_is_parsed_not_default(tmp_path):
 def test_empty_content_file_is_an_error(tmp_path):
     empty_skills = ""
     with pytest.raises(ValidationError) as excinfo:
-        load(write_repo(tmp_path, **{"content/skills.yml": empty_skills}))
+        load(write_repo(tmp_path, **{"content/skills.yaml": empty_skills}))
     message = str(excinfo.value)
-    assert "skills.yml" in message
+    assert "skills.yaml" in message
     assert "empty" in message.lower()
 
 
@@ -252,7 +252,7 @@ def test_local_profile_absent_uses_tracked_values(tmp_path):
 
 
 def test_local_profile_overrides_contact(tmp_path):
-    config = load(write_repo(tmp_path, **{"content/profile.local.yml": PROFILE_LOCAL}))
+    config = load(write_repo(tmp_path, **{"content/profile.local.yaml": PROFILE_LOCAL}))
     assert config.profile.has_local_override is True
     assert config.profile.contact == (
         "Email: [real@cornell.edu](mailto:real@cornell.edu)",
@@ -262,7 +262,7 @@ def test_local_profile_overrides_contact(tmp_path):
 
 def test_partial_local_profile_keeps_untouched_fields(tmp_path):
     # The override supplies only `contact`; name and taglines must survive.
-    profile = load(write_repo(tmp_path, **{"content/profile.local.yml": PROFILE_LOCAL})).profile
+    profile = load(write_repo(tmp_path, **{"content/profile.local.yaml": PROFILE_LOCAL})).profile
     assert profile.name == "Chengxuan Li"
     assert [t.text for t in profile.taglines] == ["Targeted headline", "Default headline"]
 
@@ -270,13 +270,40 @@ def test_partial_local_profile_keeps_untouched_fields(tmp_path):
 def test_local_profile_error_names_the_local_file(tmp_path):
     bad = "contact: not-a-list\n"
     with pytest.raises(ValidationError) as excinfo:
-        load(write_repo(tmp_path, **{"content/profile.local.yml": bad}))
+        load(write_repo(tmp_path, **{"content/profile.local.yaml": bad}))
     message = str(excinfo.value)
-    assert "profile.local.yml" in message
+    assert "profile.local.yaml" in message
     assert "must be a list of lines" in message
 
 
 def test_local_profile_is_not_loaded_as_a_section(tmp_path):
-    config = load(write_repo(tmp_path, **{"content/profile.local.yml": PROFILE_LOCAL}))
+    config = load(write_repo(tmp_path, **{"content/profile.local.yaml": PROFILE_LOCAL}))
     assert "profile.local" not in config.sections
+    assert sorted(config.sections) == ["experience", "skills"]
+
+
+def test_stray_yml_file_is_reported_not_ignored(tmp_path):
+    """The project standardises on .yaml; discovery globs *.yaml only, so a
+    stray .yml would otherwise vanish in silence."""
+    root = write_repo(tmp_path)
+    (root / "content" / "awards.yml").write_text(
+        "title: Awards\ntype: rows\nitems:\n  - text: An award\n", encoding="utf-8"
+    )
+    with pytest.raises(ValidationError) as excinfo:
+        load(root)
+    problem = next(p for p in excinfo.value.problems if p.code == "legacy_yml_extension")
+    assert "awards.yml" in problem.message
+    assert "awards.yaml" in problem.hint
+
+
+def test_stray_variants_yml_at_the_root_is_reported(tmp_path):
+    root = write_repo(tmp_path)
+    (root / "variants.yml").write_text("long:\n  sections: []\n", encoding="utf-8")
+    with pytest.raises(ValidationError) as excinfo:
+        load(root)
+    assert any(p.code == "legacy_yml_extension" for p in excinfo.value.problems)
+
+
+def test_no_legacy_problem_when_everything_is_yaml(tmp_path):
+    config = load(write_repo(tmp_path))
     assert sorted(config.sections) == ["experience", "skills"]

@@ -22,16 +22,16 @@ guidance that asks for such a trailer.
 Do not `git add -f` it, do not copy its contents into tracked files, and do not
 have the build read from it. It is a human reference, not a build input.
 
-**3. Never put real contact details in `content/profile.yml`.** That file is
+**3. Never put real contact details in `content/profile.yaml`.** That file is
 tracked, and its `you@example.com` / `+1 (555) 000-0000` values are deliberate
 placeholders, not stale data to be helpfully corrected. Real details belong in
-`content/profile.local.yml`, which is gitignored. Committing a real phone number
+`content/profile.local.yaml`, which is gitignored. Committing a real phone number
 cannot be undone without rewriting history, so if you find yourself "fixing" the
 placeholders, stop.
 
-Only `*.local.yml` files are per-machine overrides; they are excluded from
-section discovery, so `content/skills.local.yml` would be silently ignored
-rather than becoming a section. Only `profile.local.yml` is wired up today.
+Only `*.local.yaml` files are per-machine overrides; they are excluded from
+section discovery, so `content/skills.local.yaml` would be silently ignored
+rather than becoming a section. Only `profile.local.yaml` is wired up today.
 
 **4. Never hand-edit generated output.** `.build/*.qmd` and `out/*.pdf` are
 artifacts. Fix the generator or the template instead. Both directories are
@@ -54,6 +54,7 @@ Neither reaches into the other. When a change comes in, route it:
 | **A new field or block type** | `cvgen/spec.py` — one table, nothing else |
 | A new validation rule or diagnostic | `cvgen/schema.py` |
 | A new diagnostic code | `cvgen/diagnostics.py` (`CODES`) |
+| A glob over `content/` | must be `*.yaml`, and must skip `LOCAL_SUFFIX` |
 | How a block becomes markdown | `cvgen/emit.py` |
 | Mapping a fenced div to a Typst call | `templates/cv.lua` |
 
@@ -102,8 +103,8 @@ Within the generator: `select.py` never formats, and `emit.py` never filters.
 **The space after the token is mandatory, and omitting it fails silently.**
 `+Research …` is *not* a marker — it is literal text that renders a stray `+`
 into the PDF while the item stays in the short CV. Write `+ Research …` or
-`+[variant] Research …`. Nothing warns you today; this has already caught one
-agent (see `docs/open-questions.md`, item 3).
+`+[variant] Research …`. This has already caught one agent; `python build.py
+--lint` now flags it (see `docs/open-questions.md`, item 3).
 
 The **trailing-whitespace requirement is not incidental** — it is the entire
 reason the grammar does not collide with markdown. A markdown link's `]` is
@@ -146,7 +147,7 @@ tooling exists to make changes to it verifiable rather than to make them for the
 
 ## Content is the owner's record
 
-`content/*.yml` describes the owner's actual career. Do not invent, embellish,
+`content/*.yaml` describes the owner's actual career. Do not invent, embellish,
 reword, or re-tier entries on your own initiative. Adding a `+` marker is a
 judgment call about what matters on their CV, and it belongs to them.
 
