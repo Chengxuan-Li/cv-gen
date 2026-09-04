@@ -80,6 +80,12 @@ python build.py --schema                 # regenerate schema/*.json from cvgen/s
 - **`cvgen/spec.py` is the single source for the content model.** `schema/*.json`
   is generated from it and a test fails if a committed copy drifts. Never
   hand-edit `schema/*.json`; run `python build.py --schema`.
+- **New content files must be `.yaml`, never `.yml`.** Discovery globs `*.yaml`
+  only, so a `.yml` file does not load. The `legacy_yml_extension` diagnostic
+  catches it rather than letting the section silently vanish — but do not rely on
+  that; name it correctly. Give it a
+  `# yaml-language-server: $schema=../schema/cv-section.schema.json` header so
+  editors validate it, and list it in `variants.yaml` or it renders nowhere.
 
 The page-geometry split looks arbitrary but isn't: Quarto's own template emits
 its `#set page(...)` call *after* the header include, so a `#set page` written

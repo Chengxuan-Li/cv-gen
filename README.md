@@ -230,7 +230,7 @@ cvgen/
   lint.py        semantic mistakes no schema can catch
   diagnostics.py Problem, stable codes, YAML line anchoring
   jsonschema.py  emits schema/*.json from spec.py
-variants.yaml     which documents exist, and their section order
+variants.yaml    which documents exist, and their section order
 content/         profile.yaml + one file per section
                  profile.local.yaml — real contact details, gitignored
 schema/          generated JSON Schema — do not hand-edit

@@ -234,20 +234,40 @@ line. A section listed for one length and not the other is simply absent there.
 
 ```
 cv-gen/
-  .gitignore            resources/, .build/, out/, __pycache__
+  .gitignore            resources/, .build/, out/, content/*.local.yaml
   README.md             usage: marker grammar, block types, adding a variant
   AGENTS.md             agent operating rules and repo invariants
-  requirements.txt      pyyaml, pytest
+  requirements.txt      pyyaml; pytest and jsonschema for tests
   build.py              CLI entry point
-  cvgen/                marker.py schema.py select.py emit.py
+  cvgen/                spec.py marker.py schema.py select.py emit.py
+                        diagnostics.py explain.py lint.py jsonschema.py
   variants.yaml
   content/              profile.yaml skills.yaml experience.yaml
                         publications.yaml awards.yaml education.yaml
+                        profile.local.yaml (untracked, real contact details)
+  schema/               generated JSON Schema, never hand-edited
   templates/            cv.typ  cv.lua
-  tests/                test_marker.py test_select.py test_schema.py test_render.py
+  tests/                one module per cvgen module, plus test_render.py
+  docs/open-questions.md   decisions deliberately left open
   .build/               generated .qmd (ignored)
   out/                  rendered PDFs (ignored)
 ```
+
+### File extension
+
+Content files use **`.yaml`**, which [the YAML spec's FAQ
+recommends](https://yaml.org/faq.html); `.yml` is a DOS three-character holdover.
+Discovery globs `*.yaml` only.
+
+Choosing one convention creates a silent failure mode: a stray `.yml` would
+simply not load, and the missing section would surface later as a confusing
+"no content file" error against `variants.yaml`. The `legacy_yml_extension`
+diagnostic reports any `.yml` under `content/`, or a `variants.yml` at the root,
+turning that into an obvious one-line fix.
+
+Accepting both extensions was the alternative and was rejected: tolerating the
+other convention defeats the point of picking one, and `skills.yaml` alongside
+`skills.yml` has no sane resolution.
 
 `resources/` holds private reference material. It is gitignored and never
 tracked, and nothing in the build reads from it.
@@ -277,16 +297,42 @@ python build.py --check                     # validate only, render nothing
 Validation runs to completion and reports **all** problems before any render, so
 one run surfaces every issue. Any error means a non-zero exit and no PDF written.
 
-| Condition | Message contains |
+Every problem carries a stable `code` alongside its prose message, plus the file,
+a source line, a path into the document, and a hint. `diagnostics.CODES` is the
+published contract: rewording a message is safe, changing or removing a code is
+breaking. Agents branch on the code.
+
+| Condition | `code` | Message contains |
+|---|---|---|
+| Variant name in `only`/`mark` declared nowhere in `variants.yaml` | `undeclared_variant` | the name, its file and item index, and the declared variants |
+| Variant declared only under the other length | — | *nothing* — deliberate no-op |
+| Section in `variants.yaml` with no `content/` file | `missing_section_file` | the section and the available section names |
+| A `.yml` file the loader will not see | `legacy_yml_extension` | the file, and the `.yaml` name to rename it to |
+| Unknown block `type` | `unknown_block_type` | the file and the four valid types |
+| Missing required field on an entry | `missing_required_field` | file, item index, field name |
+| `contact` not given as a list | `invalid_field_type` | the file that supplied the key |
+| Malformed marker (unclosed `[`) | `malformed_marker` | file, item index, the offending text |
+| Empty or non-mapping content file | `empty_file`, `not_a_mapping` | the file |
+| No `tagline` survives both gates | `no_surviving_tagline` | `profile.yaml` and the document being built |
+| `quarto` not on PATH | — | `winget install Posit.Quarto` |
+
+Two further checks are warnings rather than load errors, reported by
+`build.py --lint`: `near_miss_marker` (a `+text` with no space, which renders a
+literal `+`) and `real_contact_in_tracked_profile`.
+
+## Inspection surfaces
+
+Beyond `--check`, three commands make the model inspectable without rendering:
+
+| Command | Answers |
 |---|---|
-| Variant name in `only`/`mark` declared nowhere in `variants.yaml` | the name, its file and item index, and the declared variants |
-| Variant declared only under the other length | *nothing* — deliberate no-op |
-| Section in `variants.yaml` with no `content/` file | the section and the available section names |
-| Unknown block `type` | the file and the four valid types |
-| Missing required field on an entry | file, item index, field name |
-| Malformed marker (unclosed `[`) | file, item index, the offending text |
-| No `tagline` survives both gates | `profile.yaml` and the document being built |
-| `quarto` not on PATH | `winget install Posit.Quarto` |
+| `--explain LENGTH/VARIANT` | for each item, included or excluded, and which gate decided it |
+| `--lint` | the two silent mistakes above, which no schema can catch |
+| `--schema` | regenerates `schema/*.json` from `cvgen/spec.py` |
+
+`--json` on any of them emits machine-readable output. **Under `--json`, stdout
+carries only the JSON document** — warnings go to stderr — so it pipes straight
+into a parser. Exit codes: `0` success, `1` content or build failure, `2` usage.
 
 ## Testing
 
@@ -304,7 +350,20 @@ one run surfaces every issue. Any error means a non-zero exit and no PDF written
   wrapper divs the template expects, in the shape the sandwiching technique
   requires.
 - **`test_build.py`** — `documents_for` resolves `--all`/`--long`/`--short`/
-  `--variant` flag combinations to the right (length, variant) pairs.
+  `--variant` flag combinations to the right (length, variant) pairs; the CLI's
+  JSON shapes and exit codes; that `build_one` raises rather than reporting
+  success when Quarto produces no PDF.
+- **`test_diagnostics.py`** — path formatting and YAML line anchoring, including
+  that a malformed file still yields problems, just without line numbers.
+- **`test_explain.py`** — which gate decides each item, and that bullets under an
+  excluded entry are not reported separately, since they were never judged on
+  their own markers.
+- **`test_lint.py`** — both rules fire, and neither false-positives on `-5% peak
+  load reduction` or a `+1 (555)` phone number.
+- **`test_schema_export.py`** — the committed `schema/*.json` matches what
+  `spec.py` generates, each schema is itself valid, it accepts every real content
+  file, and it **rejects** malformed input. That last group matters: a schema
+  accepting everything would pass a sync check while being useless.
 - **`test_render.py`** — smoke test: every document builds, PDFs are non-trivial
   in size, the short variant is exactly one page, and markdown formatting
   survives into the PDF text layer.
@@ -319,3 +378,9 @@ one run surfaces every issue. Any error means a non-zero exit and no PDF written
 | `general` inherited, not a sibling | Otherwise every targeted variant would start empty and shared content would need listing on every item. |
 | Lua filter rather than emitting raw Typst | Raw Typst blocks would bypass Pandoc, breaking `**bold**` and links inside content. |
 | Rendered PDFs gitignored | Repo stays source-only and reproducible. Trivially reversible if linkable PDFs are wanted later. |
+| `.yaml`, not `.yml` | The YAML spec recommends it. Discovery globs `*.yaml` only, and `legacy_yml_extension` reports strays so the choice cannot fail silently. |
+| Content model declared in `spec.py` | The validator and the published JSON Schema derive from one table, so they cannot drift. Adding a field is a one-line edit. |
+| Declarative table over Pydantic | Pydantic would replace only the structural half while rewriting code that is already correct and well-tested, and cannot express the marker grammar or the two gates either. |
+| Stable diagnostic `code`s | Agents branch on codes; prose can then be reworded freely. Removing a code is the breaking change. |
+| Line numbers via `yaml.compose` | Stashing a `__line__` key during construction pollutes every mapping and leaks into anything iterating keys. |
+| Real contact in an untracked `.local.yaml` | Keeps a phone number out of tracked files. Placeholders are unmistakable, and the build reports which source it used, since the dangerous outcome is a successful build carrying fake details. |
