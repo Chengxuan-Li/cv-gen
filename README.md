@@ -82,7 +82,7 @@ Any item may carry a leading marker controlling which documents it reaches:
 ```yaml
 bullets:
   - Develop load profile inference methods using ML and optimization.
-  - +Research time-series-based inverse modeling workflows.
+  - + Research time-series-based inverse modeling workflows.
   - +[nvidia-pos-1] Build GPU-accelerated pipelines for large-scale simulation.
 ```
 
@@ -96,10 +96,20 @@ with markdown. A link's `]` is always followed by `(`, never a space:
 
 | Text | Read as |
 |---|---|
+| `+ Research inverse modeling` | marker, then text |
 | `+[gev-pos-1] Research inverse modeling` | marker, then text |
+| `+Research inverse modeling` | **plain text** — no space after `+` |
 | `[ShadingZip](https://…) is a tool` | plain text — no leading `+`/`-` |
 | `-[ShadingZip](https://…) is a tool` | plain text — `]` followed by `(` |
 | `-5% peak load reduction` | plain text — `-` not followed by `[` or space |
+
+> **The space is not optional.** `+Research …` is not a marker — it renders as a
+> literal `+` in the PDF and the item stays in the short CV. Nothing warns you.
+> Write `+ Research …` or `+[variant] Research …`.
+>
+> The rule exists because `-5% peak load reduction` and `-[link](url) …` are
+> ordinary content that must not be swallowed as markers. Requiring the space is
+> what tells them apart.
 
 To start a line with a literal `+ ` or `- `, escape it: `\+ `.
 
@@ -184,3 +194,12 @@ To restyle the CV, edit the Typst template — no Python involved.
 ```bash
 python -m pytest
 ```
+
+## Further reading
+
+| Document | What it is |
+|---|---|
+| [AGENTS.md](AGENTS.md) | Operating rules and invariants for AI agents working here |
+| [docs/open-questions.md](docs/open-questions.md) | Decisions deliberately left open — read before proposing improvements |
+| [docs/superpowers/specs/…-design.md](docs/superpowers/specs/2026-09-03-cv-gen-design.md) | The design and its rationale |
+| [docs/superpowers/plans/…-implementation.md](docs/superpowers/plans/2026-09-03-cv-gen-implementation.md) | How it was built, task by task |

@@ -4,6 +4,11 @@ Operating rules for AI agents working in this repository. Read
 [README.md](README.md) for the content model and [the design
 spec](docs/superpowers/specs/2026-09-03-cv-gen-design.md) for the full rationale.
 
+**Read [docs/open-questions.md](docs/open-questions.md) before proposing
+improvements.** It lists decisions the owner has deliberately left open. Several
+look like defects and are not — proposing a "fix" for one of them wastes a turn
+and, in two cases, would actively do harm.
+
 ## Hard rules
 
 **1. Never attribute a commit to Claude.** No `Co-Authored-By: Claude` trailer,
@@ -68,6 +73,12 @@ Within the generator: `select.py` never formats, and `emit.py` never filters.
 ```
 ('+' | '-') ( '[' names ']' )?     must be followed by whitespace
 ```
+
+**The space after the token is mandatory, and omitting it fails silently.**
+`+Research …` is *not* a marker — it is literal text that renders a stray `+`
+into the PDF while the item stays in the short CV. Write `+ Research …` or
+`+[variant] Research …`. Nothing warns you today; this has already caught one
+agent (see `docs/open-questions.md`, item 3).
 
 The **trailing-whitespace requirement is not incidental** — it is the entire
 reason the grammar does not collide with markdown. A markdown link's `]` is

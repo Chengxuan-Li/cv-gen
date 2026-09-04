@@ -72,6 +72,7 @@ space. No escaping is needed for ordinary content.
 |---|---|
 | `+[gev-pos-1] Research inverse modeling` | marker `+`, only `[gev-pos-1]` |
 | `+ Research inverse modeling` | marker `+`, only `[general]` |
+| `+Research inverse modeling` | **no marker** — no space after `+` |
 | `Develop load profile inference…` | no marker; tier both, `[general]` |
 | `-[ShadingZip](https://x) is a tool` | no marker — `]` followed by `(` |
 | `[ShadingZip](https://x) is a tool` | no marker — no leading `+`/`-` |
@@ -134,7 +135,7 @@ entries:
     role: "PhD Researcher, Advisors: Prof Timur Dogan, Prof Oliver Gao, Prof Jacob Mays"
     bullets:
       - Develop load profile inference methods using machine learning, optimization, and statistical modeling.
-      - +Research time-series-based inverse modeling and surrogate-learning workflows for model calibration.
+      - + Research time-series-based inverse modeling and surrogate-learning workflows for model calibration.
   - org: EnergyAtlas.io
     location: Ithaca NY
     dates: Jan 2025 – Current

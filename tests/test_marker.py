@@ -22,6 +22,11 @@ from cvgen.marker import BOTH, GENERAL, LONG, Marker, MarkerError, parse_item, p
         ("[ShadingZip](https://x) is a tool", BOTH, (GENERAL,), "[ShadingZip](https://x) is a tool"),
         ("**Nemetschek Award** *Second place*", BOTH, (GENERAL,), "**Nemetschek Award** *Second place*"),
         ("-5% peak load reduction", BOTH, (GENERAL,), "-5% peak load reduction"),
+        # The space after '+' is required. '+Research' is NOT a marker - it is
+        # literal text with a stray '+'. Easy to get wrong, and it fails
+        # silently in the rendered PDF, so it is pinned here.
+        ("+Research inverse modeling", BOTH, (GENERAL,), "+Research inverse modeling"),
+        ("-Shared bullet", BOTH, (GENERAL,), "-Shared bullet"),
         # Escapes for a literal leading '+ ' or '- '.
         ("\\+ Literal plus", BOTH, (GENERAL,), "+ Literal plus"),
         ("\\- Literal minus", BOTH, (GENERAL,), "- Literal minus"),
