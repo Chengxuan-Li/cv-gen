@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=../schema/cv-section.schema.json
 title: Technical Skills
 type: labels
 items:

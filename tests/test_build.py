@@ -1,3 +1,5 @@
+import json
+from pathlib import Path
 import pytest
 
 import build
@@ -137,3 +139,80 @@ def test_reports_source_when_local_profile_is_present(tmp_path, capsys, monkeypa
     captured = capsys.readouterr()
     assert "WARNING" not in captured.err
     assert "content/profile.local.yml" in captured.out
+
+
+def test_check_json_reports_documents_and_contact_source(tmp_path, capsys, monkeypatch):
+    local = 'contact:\n  - "Email: [real@cornell.edu](mailto:real@cornell.edu)"\n'
+    monkeypatch.chdir(write_min_repo(tmp_path, local=local))
+    assert build.main(["--check", "--json"]) == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["ok"] is True
+    assert payload["documents"] == ["short/general"]
+    assert payload["contact_source"] == "content/profile.local.yml"
+
+
+def test_check_json_emits_structured_problems_with_codes(tmp_path, capsys, monkeypatch):
+    root = write_min_repo(tmp_path)
+    (root / "content" / "skills.yml").write_text(
+        "title: Skills\ntype: bogus\nitems: []\n", encoding="utf-8"
+    )
+    monkeypatch.chdir(root)
+    assert build.main(["--check", "--json"]) == 1
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["ok"] is False
+    codes = [p["code"] for p in payload["problems"]]
+    assert "unknown_block_type" in codes
+    problem = next(p for p in payload["problems"] if p["code"] == "unknown_block_type")
+    assert problem["file"] == "skills.yml"
+    assert problem["line"] == 2
+    assert problem["hint"]
+
+
+def test_lint_exits_nonzero_on_findings(tmp_path, capsys, monkeypatch):
+    root = write_min_repo(tmp_path)
+    (root / "content" / "skills.yml").write_text(
+        'title: Skills\ntype: labels\nitems:\n  - label: P\n    text: "+Python"\n',
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(root)
+    assert build.main(["--lint", "--json"]) == 1
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["ok"] is False
+    assert payload["findings"][0]["code"] == "near_miss_marker"
+
+
+def test_lint_is_clean_on_valid_content(tmp_path, capsys, monkeypatch):
+    monkeypatch.chdir(write_min_repo(tmp_path))
+    assert build.main(["--lint"]) == 0
+    assert "clean" in capsys.readouterr().out
+
+
+def test_explain_json_shape(tmp_path, capsys, monkeypatch):
+    monkeypatch.chdir(write_min_repo(tmp_path))
+    assert build.main(["--explain", "short/general", "--json"]) == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["document"] == "short/general"
+    item = payload["items"][0]
+    assert item["path"] == "skills/items[0]"
+    assert item["included"] is True
+    assert item["marker"] == {"tier": "both", "only": ["general"]}
+
+
+def test_explain_rejects_a_malformed_document_spec(tmp_path, monkeypatch):
+    monkeypatch.chdir(write_min_repo(tmp_path))
+    with pytest.raises(SystemExit):
+        build.main(["--explain", "short"])
+
+
+def test_explain_unknown_document_exits_nonzero(tmp_path, monkeypatch):
+    monkeypatch.chdir(write_min_repo(tmp_path))
+    assert build.main(["--explain", "long/nope"]) == 1
+
+
+def test_schema_writes_every_file(tmp_path, capsys, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    assert build.main(["--schema", "--json"]) == 0
+    written = json.loads(capsys.readouterr().out)["written"]
+    assert len(written) == 3
+    for path in written:
+        assert Path(path).exists()

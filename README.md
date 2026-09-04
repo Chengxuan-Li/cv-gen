@@ -59,6 +59,40 @@ python build.py --check                     # validate content, render nothing
 PDFs land in `out/cv-<length>-<variant>.pdf`. Both `out/` and the generated
 `.build/` intermediates are gitignored — the repo tracks source only.
 
+## Inspecting content
+
+```bash
+python build.py --check              # validate; reports every problem at once
+python build.py --lint               # silent mistakes a schema cannot catch
+python build.py --explain long/general   # why each item is in or out
+python build.py --schema             # regenerate schema/*.json from cvgen/spec.py
+```
+
+`--explain` answers the question the marker system otherwise hides — you can see
+a decision without rendering a PDF:
+
+```
+short/general: 15 of 17 items included
+  experience/entries[2]             EXCLUDE gate=tier     tier '+' is long-only, this document is short
+  experience/entries[0].bullets[1]  include               unmarked, so inherited from the 'general' base pool
+```
+
+`--lint` catches the two failure modes that pass validation and still produce a
+wrong document: a near-miss marker (`+Design…` with no space), and real contact
+details sitting in the tracked `profile.yml`.
+
+Add `--json` to any of these for machine-readable output. Under `--json`,
+**stdout carries only the JSON document** — warnings go to stderr — so it can be
+piped straight into a parser. Exit codes are part of the contract: `0` success,
+`1` content or build failure, `2` usage error.
+
+```bash
+python build.py --check --json | jq '.problems[] | {file, line, code}'
+```
+
+Every problem carries a stable `code` (see `cvgen/diagnostics.py`). Branch on the
+code, not the prose — messages may be reworded, codes will not be.
+
 ## Writing content
 
 Content lives in `content/*.yml`. Prose fields are **markdown**, so `**bold**`,
@@ -177,10 +211,20 @@ Then tag content with `[your-variant]`. Nothing else to wire up.
 
 ```
 build.py         CLI entry point
-cvgen/           marker.py  schema.py  select.py  emit.py
+cvgen/
+  spec.py        the content model, declared as data — the single source
+  marker.py      the marker grammar
+  schema.py      load and validate, against spec.py
+  select.py      the two inclusion gates
+  emit.py        selected content → Quarto markdown
+  explain.py     why each item is in or out
+  lint.py        semantic mistakes no schema can catch
+  diagnostics.py Problem, stable codes, YAML line anchoring
+  jsonschema.py  emits schema/*.json from spec.py
 variants.yml     which documents exist, and their section order
 content/         profile.yml + one file per section
                  profile.local.yml — real contact details, gitignored
+schema/          generated JSON Schema — do not hand-edit
 templates/       cv.typ (all styling)  cv.lua (markdown → Typst bridge)
 tests/           pytest suite
 resources/       private reference material — gitignored, never tracked
@@ -188,6 +232,14 @@ resources/       private reference material — gitignored, never tracked
 
 `build.py` decides **what** appears; `templates/cv.typ` decides **how it looks**.
 To restyle the CV, edit the Typst template — no Python involved.
+
+**`cvgen/spec.py` is the single source for the content model.** The validator,
+the JSON Schema under `schema/`, and this README's block-type table all derive
+from it, so adding a field means editing one table. `schema/*.json` is generated
+— a test fails if a committed copy drifts from what `spec.py` would produce.
+
+Every content file carries a `# yaml-language-server: $schema=…` header, so an
+editor and an agent see the same structural validation as the build.
 
 ## Tests
 

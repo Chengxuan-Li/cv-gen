@@ -1,0 +1,205 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "cv-section.schema.json",
+  "title": "cv-gen section file",
+  "description": "One content/*.yml section file. The 'type' key selects which shape applies. Structure only - marker semantics are not expressible here.",
+  "type": "object",
+  "oneOf": [
+    {
+      "title": "labels section",
+      "description": "Skills. Renders as: `**Label**: text`, one per line",
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Heading rendered above the section."
+        },
+        "type": {
+          "const": "labels"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": {
+                "type": "string",
+                "description": "The bolded label before the colon."
+              },
+              "text": {
+                "type": "string",
+                "description": "Markdown, may carry a marker. A leading '+ ' or '-[variant] ' marker is honoured; the space is required."
+              }
+            },
+            "required": [
+              "label",
+              "text"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "title",
+        "type",
+        "items"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "title": "entries section",
+      "description": "Experience, Education. Renders as: **Org**, Location - right-aligned date; *italic role*; bullets",
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Heading rendered above the section."
+        },
+        "type": {
+          "const": "entries"
+        },
+        "entries": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "org": {
+                "type": "string",
+                "description": "Organisation, rendered bold."
+              },
+              "location": {
+                "type": "string",
+                "description": "Rendered after the org, unbolded."
+              },
+              "dates": {
+                "type": "string",
+                "description": "Rendered flush right on the org line."
+              },
+              "role": {
+                "type": "string",
+                "description": "Rendered italic on its own line."
+              },
+              "mark": {
+                "type": "string",
+                "pattern": "^[+-](\\[[^\\]]*\\])?$",
+                "description": "Marker for the whole entry, e.g. '+' or '-[a,b]'."
+              },
+              "bullets": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Markdown bullets, each may carry a marker."
+              }
+            },
+            "required": [
+              "org",
+              "location",
+              "dates",
+              "role"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "title",
+        "type",
+        "entries"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "title": "rows section",
+      "description": "Awards & Grants. Renders as: one line, text left - date right",
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Heading rendered above the section."
+        },
+        "type": {
+          "const": "rows"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "type": "string",
+                "description": "Shorthand for {text: ...}."
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "text": {
+                    "type": "string",
+                    "description": "Markdown, may carry a marker. A leading '+ ' or '-[variant] ' marker is honoured; the space is required."
+                  },
+                  "date": {
+                    "type": "string",
+                    "description": "Rendered flush right on the same line."
+                  }
+                },
+                "required": [
+                  "text"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "title",
+        "type",
+        "items"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "title": "prose section",
+      "description": "Publications. Renders as: markdown paragraph with hanging indent",
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Heading rendered above the section."
+        },
+        "type": {
+          "const": "prose"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "type": "string",
+                "description": "Shorthand for {text: ...}."
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "text": {
+                    "type": "string",
+                    "description": "Markdown, may carry a marker. A leading '+ ' or '-[variant] ' marker is honoured; the space is required."
+                  }
+                },
+                "required": [
+                  "text"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "title",
+        "type",
+        "items"
+      ],
+      "additionalProperties": false
+    }
+  ]
+}

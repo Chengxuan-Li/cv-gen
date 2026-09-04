@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=../schema/cv-profile.schema.json
 # Tracked template. The contact details below are DELIBERATE PLACEHOLDERS and
 # are meant to look obviously fake, so they are unmistakable if one ever reaches
 # a rendered PDF.

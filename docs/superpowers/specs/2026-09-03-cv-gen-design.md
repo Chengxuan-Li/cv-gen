@@ -41,6 +41,11 @@ has no LaTeX dependency, and builds take well under a second.
 | `select.py` | Apply the two inclusion gates; order sections for a document. | `schema` |
 | `emit.py` | Render selected blocks to `.qmd` markdown. Decides only *how it is written*. | nothing |
 | `build.py` | CLI; wires the above; invokes `quarto render`. | all |
+| `spec.py` | The content model declared as data. The single source for what a content file may contain. | nothing |
+| `diagnostics.py` | `Problem`, the stable `CODES` contract, and YAML line anchoring. | nothing |
+| `explain.py` | Per-item include/exclude with the deciding gate. | `select` |
+| `lint.py` | Semantic mistakes no schema can catch. | `schema` |
+| `jsonschema.py` | Emits `schema/*.json` from `spec.py`. | `spec` |
 
 Each module is independently testable and small enough to hold in context at
 once. `select.py` never formats; `emit.py` never filters.

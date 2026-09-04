@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "cv-variants.schema.json",
+  "title": "cv-gen variants file",
+  "description": "variants.yml: which (length, variant) documents exist.",
+  "type": "object",
+  "properties": {
+    "long": {
+      "type": "object",
+      "properties": {
+        "sections": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Section names, which are content/ filename stems, in render order."
+        },
+        "variants": {
+          "type": "object",
+          "description": "Variant name to optional overrides. 'general' is the inherited base pool, not a sibling variant.",
+          "additionalProperties": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "sections": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Section names, which are content/ filename stems, in render order."
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "sections",
+        "variants"
+      ],
+      "additionalProperties": false
+    },
+    "short": {
+      "type": "object",
+      "properties": {
+        "sections": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Section names, which are content/ filename stems, in render order."
+        },
+        "variants": {
+          "type": "object",
+          "description": "Variant name to optional overrides. 'general' is the inherited base pool, not a sibling variant.",
+          "additionalProperties": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "sections": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Section names, which are content/ filename stems, in render order."
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "sections",
+        "variants"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "minProperties": 1,
+  "additionalProperties": false
+}

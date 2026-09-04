@@ -51,9 +51,34 @@ Neither reaches into the other. When a change comes in, route it:
 | Everything else visual: spacing, rules, heading styles, list markers | `templates/cv.typ` |
 | Which items appear in which document | `cvgen/select.py` |
 | New marker syntax | `cvgen/marker.py` |
-| New content file shape or a validation error | `cvgen/schema.py` |
+| **A new field or block type** | `cvgen/spec.py` — one table, nothing else |
+| A new validation rule or diagnostic | `cvgen/schema.py` |
+| A new diagnostic code | `cvgen/diagnostics.py` (`CODES`) |
 | How a block becomes markdown | `cvgen/emit.py` |
 | Mapping a fenced div to a Typst call | `templates/cv.lua` |
+
+## Working here as an agent
+
+Four commands make the content model inspectable without rendering anything:
+
+```bash
+python build.py --check --json           # structured problems: file, line, path, code, hint
+python build.py --lint --json            # silent mistakes a schema cannot catch
+python build.py --explain long/general --json   # why each item is in or out
+python build.py --schema                 # regenerate schema/*.json from cvgen/spec.py
+```
+
+- **`--explain` before you trust a marker.** The two gates are invisible in the
+  YAML; this is the only way to confirm a marker's effect without producing a PDF.
+- **Branch on `code`, not on prose.** `cvgen/diagnostics.py`'s `CODES` tuple is
+  the published contract. Rewording a message is safe; changing or removing a
+  code is a breaking change.
+- **Under `--json`, stdout carries only the JSON document.** Warnings go to
+  stderr. Do not print anything else to stdout in those paths.
+- Exit codes: `0` success, `1` content or build failure, `2` usage error.
+- **`cvgen/spec.py` is the single source for the content model.** `schema/*.json`
+  is generated from it and a test fails if a committed copy drifts. Never
+  hand-edit `schema/*.json`; run `python build.py --schema`.
 
 The page-geometry split looks arbitrary but isn't: Quarto's own template emits
 its `#set page(...)` call *after* the header include, so a `#set page` written

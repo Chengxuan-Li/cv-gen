@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "cv-profile.schema.json",
+  "title": "cv-gen profile file",
+  "description": "content/profile.yml, and the untracked content/profile.local.yml that shallow-overrides its top-level keys. No key is required here, because the override file is partial by design - 'name' is enforced after the merge, at load time, which is the only point where it can be.",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "contact": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "One markdown line per contact method."
+    },
+    "tagline": {
+      "description": "A string, or a list where the first item passing both gates wins.",
+      "oneOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      ]
+    }
+  },
+  "additionalProperties": false
+}

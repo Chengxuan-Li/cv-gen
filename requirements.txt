@@ -1,2 +1,6 @@
 pyyaml>=6.0
+
+# Test-only. Validates the emitted schema/*.json against the real content;
+# the build itself never imports it.
 pytest>=7.0
+jsonschema>=4.0

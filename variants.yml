@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=schema/cv-variants.schema.json
 # Which documents exist. Each (length, variant) pair builds one PDF.
 #
 # `sections` is the default order for that length; a variant may override it.
