@@ -1,16 +1,16 @@
 # yaml-language-server: $schema=../schema/cv-section.schema.json
-title: Awards & Grants
+title: Awards & Funding
 type: rows
 items:
-  - text: "**Nemetschek Innovation Award (€60,000)** *Second place, with no first place awarded*"
+  - text: "**[Nemetschek Innovation Award](https://www.mdsi.tum.de/en/gni/news/news-single-view/article/winners-of-the-nemetschek-innovation-award-2026/) (€60,000 prize)** — *Second place, with no first place awarded*"
     date: May 2026
-  - text: "**IBPSA-USA Simulation Showcase ($600)** *Winner*"
-    date: May 2026
-  - text: "**New York State Pollution Prevention Institute Competition ($3,000)** *Winner*"
+  - text: "**[New York State Pollution Prevention Institute Competition](https://www.rit.edu/affiliate/nysp2i/rd-student-competition) ($3,000 prize)** — *Winner*"
     date: Apr 2026
-  - text: "**NYSP2I Research Grant ($4,000)** *Co-PI*"
+  - text: "**NYSP2I Research Grant ($4,000)** — *Co-PI with Prof. Timur Dogan*"
     date: Nov 2025
-  - text: "**Holcim Building Tomorrow Scholarship** *Winner*"
-    date: Nov 2025
-  - text: "**Bentley Systems Going Digital Awards 2025** *Founders' Honors*"
+  - text: "+ **[IBPSA-USA Simulation Showcase](https://www.ibpsa.us/simulation-showcase/) ($600 prize)** — *Winner*"
+    date: May 2026
+  - text: "+ **Holcim Building Tomorrow Scholarship** — *Winner; full sponsorship for the One Young World Summit 2025*"
+    date: Oct 2025
+  - text: "+ **[Bentley Systems Going Digital Awards 2025](https://investors.bentley.com/news-releases/news-release-details/bentley-systems-announces-winners-2025-going-digital-awards)** — *Founders' Honors*"
     date: Oct 2025

@@ -3,14 +3,22 @@ title: Education
 type: entries
 entries:
   - org: Cornell University
-    location: Ithaca NY
-    dates: Aug 2024 – Current
-    role: PhD in Systems Engineering, minor in Electrical and Computer Engineering
+    location: Ithaca, NY
+    dates: Aug 2024 – Present
+    role: PhD, Systems Engineering; Minor in Electrical and Computer Engineering
+    bullets:
+      - + Research focused on machine learning, scientific computing, simulation, and computational optimization for energy and infrastructure systems.
+      - + Coursework spanning deep learning, computer vision, signal processing, Monte Carlo simulation, power systems, and applied optimization.
   - org: Architectural Association
-    location: London UK
+    location: London, UK
     dates: Jun 2024
     role: M.Arch
+    bullets:
+      - + Energy engineering and benchmarking; net-zero building operations and optimization; Post-Occupancy Evaluation (POE).
   - org: Architectural Association
-    location: London UK
+    location: London, UK
     dates: Jun 2022
     role: BA (Hons)
+    mark: "+"
+    bullets:
+      - Renewable energy systems and building energy modeling; building physics and energy performance simulation; environmental and sustainable buildings.

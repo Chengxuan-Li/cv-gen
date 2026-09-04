@@ -3,15 +3,21 @@ title: Technical Skills
 type: labels
 items:
   - label: Programming
-    text: Python, C#, .NET/ASP.NET, C++
-  - label: ML
-    text: PyTorch, scikit-learn, statsmodels, pandas, SQL, DuckDB
-  - label: Geospatial
-    text: GeoPandas, Shapely, NetTopologySuite
-  - label: Scientific computing
-    text: Optimization, surrogate modeling, Monte Carlo simulation, time-series analysis, signal processing
-  - label: Electrical systems
+    text: Python, C#, .NET / ASP.NET, C++, SQL
+  - label: Machine learning & data science
+    text: PyTorch, scikit-learn, statsmodels, pandas, NumPy, supervised and unsupervised learning, surrogate modeling, inverse modeling, physics-informed learning
+  - label: Scientific computing & optimization
+    text: Numerical methods, optimization, Monte Carlo simulation, uncertainty and sensitivity analysis, reduced-order modeling, system identification, time-series analysis, signal processing
+  - label: Energy modeling & simulation
+    text: Urban building energy modeling, reduced-order thermal and RC-network models, model calibration, parameter estimation, load-profile and load-duration analysis
+  - label: Power & electrical systems
     text: >-
-      AC power flow (NR/FDLF), contingency analysis, state estimation, economic
-      dispatch, OPF, static security assessment, demand-response and load
-      flexibility assessment
+      AC power flow, Newton–Raphson / FDLF, contingency analysis, state estimation,
+      economic dispatch, optimal power flow, static security assessment,
+      distribution-system load analysis, demand response, load flexibility, and DER integration
+  - label: Geospatial
+    text: + GeoPandas, Shapely, NetTopologySuite, spatial joins and indexing, building geometry and LiDAR processing, solar and shading analysis
+  - label: Data engineering
+    text: + SQL, DuckDB, structured and time-series pipelines, large-scale tabular processing, smart-meter / AMI and SCADA data processing
+  - label: Software engineering
+    text: + C#/.NET application development, API design, object-oriented and simulation-engine architecture, data-model design, testing, and reproducible computational workflows

@@ -1,28 +1,43 @@
 # yaml-language-server: $schema=../schema/cv-section.schema.json
-title: Experience
+title: Research & Professional Experience
 type: entries
 entries:
-  - org: Cornell University, Environmental Systems Lab
-    location: Ithaca NY
-    dates: Aug 2024 – Current
-    role: "PhD Researcher, Advisors: Prof Timur Dogan, Prof Oliver Gao, Prof Jacob Mays"
+  - org: Environmental Systems Lab, Cornell University
+    location: Ithaca, NY
+    dates: Aug 2024 – Present
+    role: "PhD Researcher — Advisors: Prof. Timur Dogan, Prof. Oliver Gao, and Prof. Jacob Mays"
     bullets:
-      - Develop load profile inference methods using machine learning, optimization, and statistical modeling.
-      - Research time-series-based inverse modeling and surrogate-learning workflows for model calibration.
+      - Develop machine-learning, optimization, statistical, and physics-informed methods for energy-demand inference, model calibration, and predictive modeling.
+      - Research inverse-modeling and surrogate-learning workflows for calibrating reduced-order and physics-based building energy models from measured data.
+      - + Develop scalable simulation and analysis methods for urban building energy modeling, electrification, demand response, and load flexibility.
+      - + Investigate time-series, system-identification, and reduced-order modeling approaches for representing building and energy-system dynamics.
+      - + Build computational workflows linking physical simulation, observational data, uncertainty analysis, and large-scale model evaluation.
+  - org: Environmental Systems Lab, Cornell University, in collaboration with Avangrid / NYSEG
+    location: Tompkins County, NY
+    dates: Mar 2025 – Present
+    role: PhD Researcher, Grid Innovations
+    bullets:
+      - Develop processing and analysis pipelines for smart-meter, AMI, SCADA, and related utility datasets across building, transformer, feeder, and distribution-system scales.
+      - Assess demand-response potential and grid flexibility under increasing heat-pump penetration, building electrification, and distributed energy resource integration.
+      - + Model and predict feeder- and transformer-level load profiles, load-duration behavior, peak demand, and temporal demand patterns.
+      - + Develop methods for aggregating and translating customer-level demand data into distribution-grid planning and operational metrics.
+      - + Investigate the effects of load growth, load shifting, DER adoption, and coordinated demand response on feeder peaks, transformer loading, and distribution-system flexibility.
   - org: EnergyAtlas.io
-    location: Ithaca NY
-    dates: Jan 2025 – Current
+    location: Ithaca, NY
+    dates: Jan 2025 – Present
     role: Lead Developer
     bullets:
-      - Lead development of a city-scale utility digital twin and energy simulation platform in C#/.NET.
-      - >-
-        Design core simulation, geometry, data, and visualization architecture
-        integrating building models, geospatial data, smart-meter observations,
-        and physical simulation.
-      - Build scalable pipelines for LiDAR, shading analysis, time-series processing, and large-scale urban simulations.
+      - Lead development of a city-scale energy digital twin and simulation platform in C#/.NET for building, utility, and urban energy analysis.
+      - Design and develop the core software architecture for building-energy simulation, geospatial modeling, time-series processing, and large-scale urban analysis.
+      - Build data pipelines for building geometry, LiDAR, weather, schedules, utility data, and other heterogeneous urban datasets.
+      - + Develop scalable reduced-order building energy simulation and calibration workflows integrating physical models with smart-meter and other observational data.
+      - + Develop computational methods for solar and shading analysis, geometric processing, model parameterization, and city-scale simulation.
+      - + Design software infrastructure for large-scale scenario analysis of electrification, energy demand, peak loads, demand response, and grid flexibility.
+      - + Develop APIs, Python interfaces, data models, and visualization workflows supporting reproducible analysis and integration with external research and planning tools.
   - org: Urban Systems Design MEP Engineers
-    location: London UK
+    location: London, UK
     dates: Jul 2023 – Sep 2023
     role: Environmental Engineering Consultant
+    mark: "+"
     bullets:
-      - Conduct sustainability assessment with **CBRE GWS** for 13+ **Google** workplace properties in the Americas.
+      - Conducted sustainability assessment with **CBRE GWS** for 13+ **Google** workplace properties in the Americas.

@@ -59,12 +59,14 @@ def test_short_variant_is_one_page(built):
     assert page_count(short) == 1
 
 
-def test_long_contains_sections_short_omits(built):
+def test_long_and_short_have_their_declared_section_sets(built):
     qmd_long = (ROOT / ".build" / "cv-long-general.qmd").read_text(encoding="utf-8")
     qmd_short = (ROOT / ".build" / "cv-short-general.qmd").read_text(encoding="utf-8")
     assert "## Selected Publications" in qmd_long
-    assert "## Selected Publications" not in qmd_short
-    assert "## Experience" in qmd_short
+    assert "## Selected Publications" in qmd_short
+    assert "## Submitted Abstracts" in qmd_long
+    assert "## Submitted Abstracts" not in qmd_short
+    assert "## Research & Professional Experience" in qmd_short
 
 
 def test_markdown_survives_into_the_document(built):

@@ -1,0 +1,20 @@
+# yaml-language-server: $schema=../schema/cv-section.schema.json
+title: Submitted Abstracts
+type: prose
+items:
+  - >-
+    **Chengxuan Li** and Timur Dogan. "Scalable smart-meter Urban Building
+    Energy Model (UBEM) calibration: a physics-supervised amortized inverse
+    surrogate learning framework." Submitted abstract, September 2026.
+  - >-
+    **Chengxuan Li** and Timur Dogan. "Sequential coordination of precomputed
+    Urban Building Energy Model (UBEM) responses enables scalable feeder-level
+    flexibility assessment." Submitted abstract, September 2026.
+  - >-
+    **Chengxuan Li** and Timur Dogan. "Lost in aggregation? Guidance on
+    functional geometric fidelity in Urban Building Energy Models (UBEMs)."
+    Submitted abstract, September 2026.
+  - >-
+    **Chengxuan Li** and Timur Dogan. "Exploration of the fidelity ladder for
+    attic and basement representation in 5R1C Urban Building Energy Models
+    (UBEMs)." Submitted abstract, September 2026.

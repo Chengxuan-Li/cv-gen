@@ -1,0 +1,21 @@
+# yaml-language-server: $schema=../schema/cv-section.schema.json
+title: Presentations
+type: rows
+items:
+  - text: >-
+      **"City-scale digital twins for building energy modeling and carbon
+      reduction planning"** — [Cesium Developer Conference
+      2026](https://cesium.com/events/cesium-developer-conference/2026/),
+      Philadelphia, PA. [Video](https://youtu.be/Ro-Bmdrd3LI?si=juQdGL6CxXeEeuCZ)
+    date: Jun 2026
+  - text: >-
+      **"How Cities Can Plan the Energy Transition Using Urban Building Energy
+      Models"** — [IBPSA-USA Educational
+      Webinar](https://www.ibpsa.us/events/how-cities-can-plan-the-energy-transition-using-urban-building-energy-models/).
+      [Video](https://www.youtube.com/watch?v=ZhmSMdbdWA4)
+    date: Feb 2026
+  - text: >-
+      **"Urban Decarbonization Strategies"** — [IBPSA USA Simulation Showcase
+      Webinar Series
+      2026](https://www.ibpsa.us/events/simulation-showcase-urban-scale/).
+    date: Jan 2026
