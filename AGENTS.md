@@ -31,15 +31,24 @@ Neither reaches into the other. When a change comes in, route it:
 
 | Change | Belongs in |
 |---|---|
-| Font, spacing, margins, rules, page geometry | `templates/cv.typ` |
+| Papersize, margins, base font family/size, page geometry | `cvgen/emit.py` (`FRONT_MATTER`) |
+| Everything else visual: spacing, rules, heading styles, list markers | `templates/cv.typ` |
 | Which items appear in which document | `cvgen/select.py` |
 | New marker syntax | `cvgen/marker.py` |
 | New content file shape or a validation error | `cvgen/schema.py` |
 | How a block becomes markdown | `cvgen/emit.py` |
 | Mapping a fenced div to a Typst call | `templates/cv.lua` |
 
-If a fix seems to need Python changes for a purely visual outcome, that is a
-signal the boundary is being crossed. Reconsider.
+The page-geometry split looks arbitrary but isn't: Quarto's own template emits
+its `#set page(...)` call *after* the header include, so a `#set page` written
+in `cv.typ` would be silently overridden. Those specific values (papersize,
+margin, `mainfont`, `fontsize`) have to live in the front matter `emit.py`
+writes, where Quarto itself reads them; `cv.typ` even notes this. This is not
+Python making a styling *decision* — the values are still fixed data Quarto
+owns, just expressed as YAML front matter instead of Typst.
+
+If a fix seems to need Python changes for a purely visual outcome beyond that
+front matter, that is a signal the boundary is being crossed. Reconsider.
 
 Within the generator: `select.py` never formats, and `emit.py` never filters.
 

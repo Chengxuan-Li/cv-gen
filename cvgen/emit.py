@@ -26,7 +26,16 @@ format:
 
 
 def _div(classes: str, body: list[str], **attrs: str) -> list[str]:
-    rendered = "".join(f' {k}="{v.replace('"', '\\"')}"' for k, v in attrs.items() if v)
+    # Escaping is hoisted into a plain variable (rather than nested inside the
+    # f-string expression below) because Python < 3.12 cannot parse an
+    # f-string expression that reuses its own quote character.
+    parts = []
+    for k, v in attrs.items():
+        if not v:
+            continue
+        escaped = v.replace('"', '\\"')
+        parts.append(f' {k}="{escaped}"')
+    rendered = "".join(parts)
     return [f"::: {{{classes}{rendered}}}", *body, ":::", ""]
 
 

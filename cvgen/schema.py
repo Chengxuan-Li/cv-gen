@@ -185,7 +185,14 @@ def _load_profile(path: Path, problems: list[str]) -> Profile:
     taglines = tuple(
         _item(t, f"{path.name}: tagline {i}", problems) for i, t in enumerate(raw_taglines)
     )
-    contact = tuple(str(c) for c in (data.get("contact") or []))
+    raw_contact = data.get("contact") or []
+    if not isinstance(raw_contact, list):
+        problems.append(
+            f"{path.name}: 'contact' must be a list of lines, "
+            f"got {type(raw_contact).__name__}"
+        )
+        raw_contact = []
+    contact = tuple(str(c) for c in raw_contact)
     return Profile(name, contact, taglines)
 
 
@@ -196,6 +203,12 @@ def _load_documents(path: Path, problems: list[str]) -> dict[str, dict[str, tupl
     for length in LENGTHS:
         spec = data.get(length)
         if not spec:
+            continue
+        if not isinstance(spec, dict):
+            problems.append(
+                f"{path.name}: {length} must be a mapping with a 'sections' list, "
+                f"got {type(spec).__name__}"
+            )
             continue
         default = tuple(str(s) for s in (spec.get("sections") or []))
         if not default:
@@ -251,7 +264,8 @@ def load(root: Path) -> Config:
                         f"which has no content file (available: {available})"
                     )
 
-    declared = {v for variants in documents.values() for v in variants} | {GENERAL}
+    config = Config(profile, sections, documents)
+    declared = config.declared_variants() | {GENERAL}
     for marker, where in _markers(sections, profile):
         for target in marker.only:
             if target not in declared:
@@ -262,4 +276,4 @@ def load(root: Path) -> Config:
 
     if problems:
         raise ValidationError(problems)
-    return Config(profile, sections, documents)
+    return config
