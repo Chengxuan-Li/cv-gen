@@ -318,7 +318,11 @@ breaking. Agents branch on the code.
 
 Two further checks are warnings rather than load errors, reported by
 `build.py --lint`: `near_miss_marker` (a `+text` with no space, which renders a
-literal `+`) and `real_contact_in_tracked_profile`.
+literal `+`) and `real_contact_in_tracked_profile`, which looks specifically for
+an email address or a phone number. A public URL is not sensitive and belongs in
+the tracked file — but because `contact:` is replaced wholesale by the override,
+such a line must be repeated in both files or it disappears once the override
+exists.
 
 ## Inspection surfaces
 

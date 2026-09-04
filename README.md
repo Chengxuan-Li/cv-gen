@@ -33,6 +33,12 @@ The override is a **shallow top-level merge**: any key present replaces that key
 entirely, so `contact:` swaps the whole list and everything else falls through
 from `profile.yaml`. You can override `name` or `tagline` the same way.
 
+One consequence worth knowing: because `contact:` is replaced wholesale, a
+non-sensitive line kept in the tracked file — a personal website, say — is
+**dropped once the override exists**, so it has to be repeated in both. Only
+email addresses and phone numbers are treated as sensitive; `--lint` flags those
+in the tracked file and ignores URLs.
+
 This is the one manual step a fresh clone needs. Without it the build still
 succeeds, so it warns on every run:
 
@@ -78,8 +84,10 @@ short/general: 15 of 17 items included
 ```
 
 `--lint` catches the two failure modes that pass validation and still produce a
-wrong document: a near-miss marker (`+Design…` with no space), and real contact
-details sitting in the tracked `profile.yaml`.
+wrong document: a near-miss marker (`+Design…` with no space), and a real email
+address or phone number sitting in the tracked `profile.yaml`. It looks for those
+two specifically — a public URL such as a personal site is not sensitive and
+belongs in the tracked file.
 
 Add `--json` to any of these for machine-readable output. Under `--json`,
 **stdout carries only the JSON document** — warnings go to stderr — so it can be

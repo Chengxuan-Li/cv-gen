@@ -43,14 +43,23 @@
   )
 ]
 
-#let cv-entry(dates: [], body) = block(width: 100%, above: 0.42em, below: 0.22em)[
+// Only the org line shares a row with the date; the role and bullets below it
+// span the full text width. Putting the whole entry in the grid's 1fr column
+// would narrow every bullet by the width of the date beside it, wrapping long
+// bullets a word or two early for no reason.
+#let cv-entry(dates: [], head: [], body) = block(width: 100%, above: 0.42em, below: 0.22em)[
   #set par(justify: false)
-  #grid(columns: (1fr, auto), body, align(top + right)[#dates])
+  #grid(columns: (1fr, auto), head, align(top + end)[#dates])
+  #body
 ]
 
-#let cv-row(dates: [], body) = block(width: 100%, above: 0.28em, below: 0.28em)[
-  #set par(justify: false)
-  #grid(columns: (1fr, auto), body, align(top + right)[#dates])
+// A row that wraps to a second line must still read as one entry. Its leading
+// is therefore tighter than the space between rows: within-entry lines sit
+// closer together than the gap separating one award from the next. If these
+// two numbers ever cross, wrapped rows visually merge with their neighbours.
+#let cv-row(dates: [], body) = block(width: 100%, above: 0.42em, below: 0.42em)[
+  #set par(leading: 0.3em, justify: false)
+  #grid(columns: (1fr, auto), body, align(top + end)[#dates])
 ]
 
 #let cv-prose(body) = block(width: 100%, above: 0.34em, below: 0.34em)[

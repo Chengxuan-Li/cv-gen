@@ -20,9 +20,25 @@ from .schema import LOCAL_SUFFIX, local_profile_path
 # that '-5% peak load reduction' and '+1 (555) 000-0000' are not flagged.
 NEAR_MISS = re.compile(r"^[+-][A-Za-z]")
 
-# A tracked placeholder should look obviously fake. Anything else in the tracked
-# profile is probably a real detail someone pasted in by mistake.
-PLACEHOLDER_MARKERS = ("example.com", "example.org", "555")
+# Only email addresses and phone numbers are sensitive. A public URL - a personal
+# site, an ORCID, a GitHub profile - belongs in the tracked file, so the rule
+# looks for the two things that actually matter rather than flagging every line
+# that fails to look like a placeholder.
+EMAIL = re.compile(r"[\w.+-]+@([\w-]+\.[\w.]+)")
+PHONE = re.compile(r"\+?\d[\d\s()\-]{6,}\d")
+PLACEHOLDER_DOMAINS = ("example.com", "example.org", "example.net")
+PLACEHOLDER_PHONE = "555"
+
+
+def _sensitive(entry: str) -> str:
+    """Name what looks real in a contact line, or '' if nothing does."""
+    for domain in EMAIL.findall(entry):
+        if domain.lower() not in PLACEHOLDER_DOMAINS:
+            return f"an email address at {domain}"
+    for number in PHONE.findall(entry):
+        if PLACEHOLDER_PHONE not in number:
+            return "a phone number"
+    return ""
 
 
 def _scalars(text: str) -> list[tuple[tuple, str, int]]:
@@ -95,14 +111,15 @@ def _real_contact(profile: Path) -> list[Problem]:
     local = local_profile_path(profile).name
     findings = []
     for index, entry in enumerate(data.get("contact") or []):
-        if any(token in str(entry) for token in PLACEHOLDER_MARKERS):
+        what = _sensitive(str(entry))
+        if not what:
             continue
         findings.append(
             Problem(
                 file=profile.name,
                 code="real_contact_in_tracked_profile",
                 message=(
-                    f"{profile.name}: contact[{index}] does not look like a placeholder; "
+                    f"{profile.name}: contact[{index}] looks like {what}; "
                     f"real details belong in {local}"
                 ),
                 line=lines.get(("contact", index)),

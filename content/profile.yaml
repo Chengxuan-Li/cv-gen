@@ -11,7 +11,11 @@ name: Chengxuan Li
 contact:
   - "Email: [you@example.com](mailto:you@example.com)"
   - "Phone: +1 (555) 000-0000"
+  # A public URL is not sensitive, so it lives here rather than in the override.
+  # It must be repeated in profile.local.yaml too: that file replaces the whole
+  # `contact` list, so anything only listed here is dropped once it exists.
+  - "Web: [chengxuan-li.github.io](https://chengxuan-li.github.io)"
 # A list: the first tagline passing both gates wins. Put targeted lines above
 # the unmarked fallback.
 tagline:
-  - PhD Candidate in Systems Engineering, Minor in Electrical & Computer Engineering
+  - PhD Candidate in Systems Engineering at Cornell University · AI, Software & Energy Systems

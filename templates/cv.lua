@@ -61,7 +61,21 @@ function Div(el)
     table.insert(out, raw("])"))
     return out
   elseif classes:includes("cv-entry") then
-    return wrap("#cv-entry(dates: [" .. dates .. "])[", el.content, "]")
+    -- Only the org line shares a row with the date. Everything after it - the
+    -- role and the bullets - spans the full text width, so a bullet is not
+    -- needlessly narrowed by the width of the date column beside it.
+    -- emit.py always writes the org line as the first block; see its _entry().
+    local head = {}
+    local body = {}
+    for i, block in ipairs(el.content) do
+      table.insert(i == 1 and head or body, block)
+    end
+    local out = { raw("#cv-entry(dates: [" .. dates .. "], head: [") }
+    append(out, head)
+    table.insert(out, raw("])["))
+    append(out, body)
+    table.insert(out, raw("]"))
+    return out
   elseif classes:includes("cv-row") then
     return wrap("#cv-row(dates: [" .. dates .. "])[", el.content, "]")
   elseif classes:includes("cv-prose") then

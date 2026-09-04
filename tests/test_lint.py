@@ -128,3 +128,47 @@ items:
 
 def test_the_real_repository_is_lint_clean():
     assert lint(Path(__file__).resolve().parent.parent) == []
+
+
+AWARD = """
+title: Awards
+type: rows
+items:
+  - text: "An award"
+"""
+
+
+def profile_with(*contact: str) -> str:
+    lines = [f'  - "{c}"' for c in contact]
+    return "\n".join(["name: Chengxuan Li", "contact:", *lines, "tagline: A tagline", ""])
+
+
+def test_a_public_url_in_the_tracked_profile_is_not_flagged(tmp_path):
+    """A personal site is not sensitive - it belongs in the tracked file."""
+    profile = profile_with(
+        "Email: [you@example.com](mailto:you@example.com)",
+        "Phone: +1 (555) 000-0000",
+        "Web: [chengxuan-li.github.io](https://chengxuan-li.github.io)",
+    )
+    assert lint(write(tmp_path, AWARD, profile=profile)) == []
+
+
+def test_a_real_phone_number_is_flagged(tmp_path):
+    profile = profile_with("Phone: +1 (607) 227 5495")
+    findings = lint(write(tmp_path, AWARD, profile=profile))
+    assert codes(findings) == ["real_contact_in_tracked_profile"]
+    assert "phone number" in findings[0].message
+
+
+def test_a_real_email_is_flagged_and_names_the_domain(tmp_path):
+    profile = profile_with("Email: [a@cornell.edu](mailto:a@cornell.edu)")
+    findings = lint(write(tmp_path, AWARD, profile=profile))
+    assert "cornell.edu" in findings[0].message
+
+
+def test_placeholder_email_and_phone_are_not_flagged(tmp_path):
+    profile = profile_with(
+        "Email: [you@example.com](mailto:you@example.com)",
+        "Phone: +1 (555) 000-0000",
+    )
+    assert lint(write(tmp_path, AWARD, profile=profile)) == []
