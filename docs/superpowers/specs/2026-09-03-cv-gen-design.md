@@ -264,7 +264,13 @@ one run surfaces every issue. Any error means a non-zero exit and no PDF written
   inheritance into all variants; container markers removing children; per-variant
   section order and override.
 - **`test_schema.py`** — each error condition raises with a message naming the
-  file and item.
+  file and item; marker and `date` parsing on `labels`, `rows`, and `prose`
+  items.
+- **`test_emit.py`** — the Lua-filter div contract: each block type renders the
+  wrapper divs the template expects, in the shape the sandwiching technique
+  requires.
+- **`test_build.py`** — `documents_for` resolves `--all`/`--long`/`--short`/
+  `--variant` flag combinations to the right (length, variant) pairs.
 - **`test_render.py`** — smoke test: every document builds, PDFs are non-trivial
   in size, the short variant is exactly one page, and markdown formatting
   survives into the PDF text layer.

@@ -20,7 +20,7 @@ pip install -r requirements.txt
 ```bash
 python build.py --all                       # every declared document
 python build.py --long                      # every long variant
-python build.py --long --variant gev-pos-1  # one document
+python build.py --long --variant general    # one document
 python build.py --check                     # validate content, render nothing
 ```
 
@@ -96,6 +96,15 @@ stem is the section's name in `variants.yml`.
 | `entries` | Experience, Education | **Org**, Location — right-aligned date; *role*; bullets |
 | `rows` | Awards & Grants | one line, text left — date right |
 | `prose` | Publications | markdown paragraph, hanging indent |
+
+A `rows` item may carry an optional `date:` alongside its `text:`, rendered
+right-aligned:
+
+```yaml
+items:
+  - text: "**IBPSA-USA Simulation Showcase ($600)** *Winner*"
+    date: May 2026
+```
 
 ## Adding a variant
 
