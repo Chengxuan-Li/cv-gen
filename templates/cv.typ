@@ -2,8 +2,26 @@
 // this file and nothing else. Page size, margins, font and base size come from
 // the front matter that emit.py writes.
 
-#set par(leading: 0.52em, spacing: 0.55em, justify: false)
-#set list(indent: 0.55em, body-indent: 0.42em, spacing: 0.4em, marker: [•])
+// Three spacing values, and only three. Every gap in the document is one of
+// them, so the vertical rhythm stays consistent and each level of separation is
+// visibly distinct from the one below it:
+//
+//   LEADING  < PARA-GAP < ENTRY-GAP
+//   within a   between     between
+//   paragraph  paragraphs  entries
+//
+// The ordering is the point. If PARA-GAP ever fell below LEADING, wrapped lines
+// would look further apart than separate paragraphs; if ENTRY-GAP fell below
+// PARA-GAP, entries would stop reading as units. Earlier revisions kept that
+// ordering by overriding leading per wrapper, which made line height differ
+// between sections - awards were set at 0.3em against 0.52em elsewhere. The
+// separation now comes entirely from block spacing, so leading is uniform.
+#let LEADING = 0.44em
+#let PARA-GAP = 0.54em
+#let ENTRY-GAP = 0.78em
+
+#set par(leading: LEADING, spacing: PARA-GAP, justify: false)
+#set list(indent: 0.55em, body-indent: 0.42em, spacing: PARA-GAP, marker: [•])
 
 // Pandoc's typst writer emits bare #link[...] with no styling, so a DOI or
 // mailto link is visually indistinguishable from plain text. Underline it and
@@ -39,7 +57,7 @@
 #set page(numbering: none, footer: none)
 
 // Section heading: bold label with a rule directly beneath.
-#show heading.where(level: 2): it => block(width: 100%, above: 0.75em, below: 0.42em)[
+#show heading.where(level: 2): it => block(width: 100%, above: ENTRY-GAP, below: PARA-GAP)[
   #text(size: 11.5pt, weight: "bold")[#it.body]
   #v(-0.62em)
   #line(length: 100%, stroke: 0.7pt)
@@ -52,7 +70,7 @@
 // wrapper below re-asserts `justify: false` one scope deeper, inside its own
 // block, which is what actually takes effect for its content.
 
-#let cv-head(left: [], right: []) = block(width: 100%, below: 0.55em)[
+#let cv-head(left: [], right: []) = block(width: 100%, below: ENTRY-GAP)[
   #set par(justify: false)
   #grid(
     columns: (1fr, auto),
@@ -66,34 +84,33 @@
 // would narrow every bullet by the width of the date beside it, wrapping long
 // bullets a word or two early for no reason.
 //
-// An entry has to read as one unit, so - as with cv-row - the space *inside* it
-// is tighter than the space *between* entries. `below` carries that separation
-// rather than `above`: Typst collapses adjacent block spacing to the larger of
-// the two, so raising `below` opens the gap after the last bullet while leaving
-// heading-to-first-entry and entry-to-next-heading alone. Raising `above` would
-// loosen all three. The tighter internal spacing is also what buys the vertical
-// room for the wider gap without pushing the short CV onto a second page.
-#let cv-entry(dates: [], head: [], body) = block(width: 100%, above: 0.42em, below: 0.72em)[
-  #set par(justify: false, spacing: 0.3em)
+// An entry reads as one unit because ENTRY-GAP below it exceeds the PARA-GAP
+// between its own paragraphs and bullets - not because anything inside it is
+// set tighter. `below` carries that separation rather than `above`: Typst
+// collapses adjacent block spacing to the larger of the two, so `below` opens
+// the gap after the last bullet while leaving heading-to-first-entry and
+// entry-to-next-heading alone. Raising `above` would loosen all three.
+#let cv-entry(dates: [], head: [], body) = block(width: 100%, above: PARA-GAP, below: ENTRY-GAP)[
+  #set par(justify: false)
   #grid(columns: (1fr, auto), head, align(top + end)[#dates])
   #body
 ]
 
-// A row that wraps to a second line must still read as one entry. Its leading
-// is therefore tighter than the space between rows: within-entry lines sit
-// closer together than the gap separating one award from the next. If these
-// two numbers ever cross, wrapped rows visually merge with their neighbours.
-#let cv-row(dates: [], body) = block(width: 100%, above: 0.42em, below: 0.42em)[
-  #set par(leading: 0.3em, justify: false)
+// A row that wraps to a second line must still read as one entry. That holds
+// because LEADING joins its wrapped lines while ENTRY-GAP separates it from the
+// next row - the same ordering every other block relies on, rather than the
+// locally tightened leading an earlier revision used here.
+#let cv-row(dates: [], body) = block(width: 100%, above: PARA-GAP, below: ENTRY-GAP)[
+  #set par(justify: false)
   #grid(columns: (1fr, auto), body, align(top + end)[#dates])
 ]
 
-#let cv-prose(body) = block(width: 100%, above: 0.34em, below: 0.34em)[
+#let cv-prose(body) = block(width: 100%, above: PARA-GAP, below: PARA-GAP)[
   #set par(hanging-indent: 1.1em, justify: false)
   #body
 ]
 
-#let cv-labels(body) = block(width: 100%, above: 0.2em, below: 0.3em)[
+#let cv-labels(body) = block(width: 100%, above: PARA-GAP, below: PARA-GAP)[
   #set par(justify: false)
   #body
 ]
