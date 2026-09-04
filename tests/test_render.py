@@ -73,3 +73,16 @@ def test_markdown_survives_into_the_document(built):
     qmd = (ROOT / ".build" / "cv-long-general.qmd").read_text(encoding="utf-8")
     assert "**CBRE GWS**" in qmd
     assert "[DOI: 10.1080/19401493.2025.2536261]" in qmd
+
+
+def test_every_link_carries_a_visible_mark(built):
+    """Underlining alone reads as emphasis on paper, so links get a leading mark.
+
+    Asserted against the generated .typ rather than templates/cv.typ, so this
+    fails if the rule stops reaching the pipeline as well as if it is deleted.
+    """
+    typ = (ROOT / ".build" / "cv-long-general.typ").read_text(encoding="utf-8")
+    assert "#let link-mark" in typ
+    assert "#show link: it => [#link-mark" in typ
+    # The rule is worthless if the document has no links to apply it to.
+    assert typ.count("#link(") > 5

@@ -6,9 +6,14 @@
 #set list(indent: 0.55em, body-indent: 0.42em, spacing: 0.4em, marker: [•])
 
 // Pandoc's typst writer emits bare #link[...] with no styling, so a DOI or
-// mailto link is visually indistinguishable from plain text. Underline it,
-// as a reader would expect from a hyperlink.
-#show link: underline
+// mailto link is visually indistinguishable from plain text. Underline it and
+// prefix a mark, so a link is discernible on paper as well as on screen -
+// underlining alone reads as emphasis once the document is printed.
+//
+// U+2197 is the conventional external-link indicator and, unlike U+1F517, is a
+// monochrome glyph present in Arial rather than a colour emoji.
+#let link-mark = text(size: 0.78em, baseline: -0.1em)[↗]
+#show link: it => [#link-mark#h(0.05em)#underline[#it]]
 
 // Name.
 #show heading.where(level: 1): it => block(width: 100%)[#text(size: 21pt, weight: "bold")[#it.body]]
