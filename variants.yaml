@@ -5,7 +5,7 @@
 # Section names are the filename stems in content/.
 
 long:
-  sections: [research-interests, education, experience, publications, submitted-abstracts, presentations, awards, skills]
+  sections: [research-interests, education, experience, publications, presentations, awards, skills]
   variants:
     general: {}
     # example-role: {sections: [skills, experience, awards, publications, education]}

@@ -22,7 +22,7 @@ entries:
       - + Model and predict feeder- and transformer-level load profiles, load-duration behavior, peak demand, and temporal demand patterns.
       - + Develop methods for aggregating and translating customer-level demand data into distribution-grid planning and operational metrics.
       - + Investigate the effects of load growth, load shifting, DER adoption, and coordinated demand response on feeder peaks, transformer loading, and distribution-system flexibility.
-  - org: EnergyAtlas.io
+  - org: "[EnergyAtlas.io](https://energyatlas.io)"
     location: Ithaca, NY
     dates: Jan 2025 – Present
     role: Lead Developer
