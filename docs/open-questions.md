@@ -8,35 +8,33 @@ Last reviewed: 2026-09-04.
 
 ---
 
-## 1. Content is untiered — `short` and `long` differ only by section
+## 1. Content tiering — RESOLVED 2026-09-04
 
-**State:** every item in `content/*.yaml` is unmarked, so it appears in both
-lengths. The two CVs differ only because `variants.yaml` gives `short` three
-sections and `long` five. The marker machinery is fully built and tested but
-unexercised on real content.
+The owner approved a content proposal on 2026-09-04, and the repository now
+uses the marker machinery throughout the real content. `long/general` includes
+all 52 selectable items; `short/general` includes 22 and excludes 24 through
+`+` markers.
 
-**Why it is open:** which bullets are long-only is a judgment about the owner's
-own career, not a technical decision. An agent must not invent a tiering.
+The current long-only choices are:
 
-**A proposal was drafted on 2026-09-03 and reverted unapplied**, pending the
-owner's call. It was three markers:
+| Where | Long-only content |
+|---|---|
+| `content/experience.yaml` | Three deeper Environmental Systems Lab bullets, three Grid Innovations bullets, four EnergyAtlas.io bullets, and the complete Urban Systems Design MEP Engineers entry |
+| `content/education.yaml` | Two Cornell detail bullets, the M.Arch detail bullet, and the complete BA (Hons) entry |
+| `content/publications.yaml` | Three of the five selected publications |
+| `content/awards.yaml` | Three of the six awards and funding items |
+| `content/skills.yaml` | Geospatial, Data engineering, and Software engineering |
 
-| Where | Marker | Rationale |
-|---|---|---|
-| `content/experience.yaml`, EnergyAtlas.io, the "Design core simulation, geometry, data, and visualization architecture…" bullet | prefix `+ ` | Longest bullet at three lines; elaborates *how* the bullet above it was achieved, which already states the outcome. |
-| `content/experience.yaml`, `Urban Systems Design MEP Engineers` entry | `mark: "+"` | A three-month 2023 internship, the oldest and least aligned item with the PhD/software trajectory. |
-| `content/education.yaml`, `BA (Hons)` entry | `mark: "+"` | Superseded by the M.Arch from the same institution. |
+The lengths also differ at the section level in `variants.yaml`. Research
+Interests and Presentations appear only in the long CV. The tracked Submitted
+Abstracts section is currently not declared in either document.
 
-The Urban Systems one is the contested one: it is the only industry consulting
-role and carries CBRE and Google as recognisable names, which may outweigh the
-two lines it costs on a short CV aimed at industry rather than academia.
+This tiering is the owner's approved content judgment, not a default for future
+edits. Agents must still use `python build.py --explain LENGTH/VARIANT` after
+changing markers and must not independently re-tier new or existing claims.
 
-Skills were deliberately left untouched — the short CV has half a page free, so
-cutting skill lines would thin it for no gain.
-
-**Note the real payoff is additive.** With tiering in place the long CV can grow
-— more publications, deeper detail, a second page — while the short one holds at
-one page automatically. Today tiering mostly just makes `short` slightly tighter.
+Tiering did not by itself restore the short CV to one page after later layout
+changes. That remaining decision is recorded separately in item 5.
 
 ---
 
