@@ -48,6 +48,29 @@ entries:
       - +[gev-pos-1] Build scalable pipelines.
 """
 
+AWARDS = """
+title: Awards
+type: rows
+items:
+  - text: "+[gev-pos-1] Research Award"
+    date: May 2026
+"""
+
+SKILLS_WITH_MARKER = """
+title: Technical Skills
+type: labels
+items:
+  - label: Programming
+    text: "+[gev-pos-1] Python, C#"
+"""
+
+PROSE = """
+title: Summary
+type: prose
+items:
+  - "+[gev-pos-1] Passionate about digital twins."
+"""
+
 
 def write_repo(root: Path, **overrides: str) -> Path:
     files = {
@@ -178,6 +201,32 @@ def test_yaml_list_at_top_level_is_an_error(tmp_path):
     message = str(excinfo.value)
     assert "skills.yml" in message
     assert "list" in message.lower() or "mapping" in message.lower()
+
+
+def test_rows_item_marker_and_date_are_parsed(tmp_path):
+    config = load(write_repo(tmp_path, **{"content/awards.yml": AWARDS}))
+    item = config.sections["awards"].items[0]
+    assert item.marker.tier == "long"
+    assert item.marker.only == ("gev-pos-1",)
+    assert item.text == "Research Award"
+    assert item.date == "May 2026"
+
+
+def test_prose_item_marker_is_parsed(tmp_path):
+    config = load(write_repo(tmp_path, **{"content/summary.yml": PROSE}))
+    item = config.sections["summary"].items[0]
+    assert item.marker.tier == "long"
+    assert item.marker.only == ("gev-pos-1",)
+    assert item.text == "Passionate about digital twins."
+
+
+def test_label_item_marker_is_parsed_not_default(tmp_path):
+    config = load(write_repo(tmp_path, **{"content/skills.yml": SKILLS_WITH_MARKER}))
+    label = config.sections["skills"].items[0]
+    assert label.marker.tier == "long"
+    assert label.marker.only == ("gev-pos-1",)
+    assert label.label == "Programming"
+    assert label.text == "Python, C#"
 
 
 def test_empty_content_file_is_an_error(tmp_path):
