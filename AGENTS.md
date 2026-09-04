@@ -132,6 +132,18 @@ CV.
 - Error messages must name the file and item index. A user editing YAML needs to
   know *where*, not just *what*.
 
+## Scope: are you the content agent or the development agent?
+
+The owner splits these deliberately.
+
+- **Content** — what the CV says, and which items are `+` long-only — belongs to
+  a separate agent. If you are working on the generator, do not draft, reword or
+  tier content on your own initiative.
+- **Development** — the generator, tests, tooling, docs — is engineering work.
+
+Either way the rule below still holds: content is the owner's record, and the
+tooling exists to make changes to it verifiable rather than to make them for them.
+
 ## Content is the owner's record
 
 `content/*.yml` describes the owner's actual career. Do not invent, embellish,

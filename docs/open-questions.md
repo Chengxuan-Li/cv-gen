@@ -103,18 +103,39 @@ agent to meet it will want to know the rule is deliberate.
 
 ---
 
-## 4. Git history contains real contact details
+## 4. Real contact details are public in git history — CLOSED, do not re-raise
 
-The working tree carries only placeholders, but commit `fb3c936` and neighbours
-contain the owner's real email and phone. The owner decided on 2026-09-03 **not**
-to rewrite history.
+The working tree carries only placeholders, but commit `fb3c936` and around
+twenty neighbours contain the owner's real email and phone. The repository is
+public at `https://github.com/Chengxuan-Li/cv-gen`, so those commits are
+publicly readable.
 
-**Consequence: if this repo is ever pushed, it must be private.** Do not propose
-`git filter-repo` again unless the owner raises it.
+**The owner was told this explicitly on 2026-09-04, with the options (flip to
+private, rewrite history, or both), and chose to accept it.** This is a settled
+decision, not an oversight and not a defect.
+
+**Do not raise it again.** Do not propose `git filter-repo`, do not suggest
+changing repository visibility, and do not treat the placeholder mechanism in
+`content/profile.yml` as broken because real values exist in history — it works
+as designed and prevents *future* commits from adding more.
+
+The one rule that still binds: real contact details belong in the untracked
+`content/profile.local.yml`, never in the tracked `content/profile.yml`.
+`python build.py --lint` enforces it.
 
 ---
 
-## 5. No remote
+## 5. Division of labour: content vs development
 
-The repo exists only on the owner's machine. Nothing is backed up. See item 4
-before proposing anything public.
+As of 2026-09-04 the owner split responsibility:
+
+- **Content** — what the CV says, and how it is tiered with `+` markers
+  (item 1 above) — is handled by a **separate agent**. Do not draft, reword or
+  tier content on your own initiative.
+- **Development** — the generator, its tests, tooling and documentation — is
+  where an engineering agent should work.
+
+If you are here for development, item 1 is not yours to resolve. If you are here
+for content, `python build.py --explain LENGTH/VARIANT` shows exactly what your
+markers will do before you render anything, and `--lint` catches the near-miss
+marker that silently renders a literal `+`.
