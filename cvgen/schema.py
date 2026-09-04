@@ -18,6 +18,15 @@ BLOCK_TYPES = ("labels", "entries", "rows", "prose")
 LENGTHS = ("long", "short")
 ENTRY_FIELDS = ("org", "location", "dates", "role")
 
+# Untracked per-machine overrides. Excluded from section discovery so that
+# content/profile.local.yml never becomes a section named "profile.local".
+LOCAL_SUFFIX = ".local.yml"
+
+
+def local_profile_path(profile_path: Path) -> Path:
+    """content/profile.yml -> content/profile.local.yml"""
+    return profile_path.with_name(profile_path.stem + LOCAL_SUFFIX)
+
 
 class ValidationError(Exception):
     """One or more content files are invalid."""
@@ -64,6 +73,7 @@ class Profile:
     name: str
     contact: tuple[str, ...]
     taglines: tuple[Item, ...]
+    has_local_override: bool = False
 
 
 @dataclass(frozen=True)
@@ -175,25 +185,46 @@ def _load_section(path: Path, problems: list[str]) -> Section | None:
 
 
 def _load_profile(path: Path, problems: list[str]) -> Profile:
+    """Load profile.yml, letting an untracked profile.local.yml override it.
+
+    The tracked file carries deliberately fake contact details; real ones live in
+    the sibling `.local` file, which is gitignored. The merge is a shallow
+    top-level key replacement - a `contact:` in the override swaps the whole
+    list, since element-wise merging of a list has no unambiguous meaning.
+    """
     data = _read_yaml(path, problems)
+    origin = {key: path.name for key in data}
+
+    local_path = local_profile_path(path)
+    has_local_override = local_path.exists()
+    if has_local_override:
+        local = _read_yaml(local_path, problems)
+        data = {**data, **local}
+        origin.update({key: local_path.name for key in local})
+
+    def source(key: str) -> str:
+        """Name the file a key actually came from, so errors point at the right one."""
+        return origin.get(key, path.name)
+
     name = str(data.get("name", ""))
     if not name:
-        problems.append(f"{path.name}: missing required field 'name'")
+        problems.append(f"{source('name')}: missing required field 'name'")
 
     raw_tagline = data.get("tagline", "")
     raw_taglines = raw_tagline if isinstance(raw_tagline, list) else [raw_tagline]
     taglines = tuple(
-        _item(t, f"{path.name}: tagline {i}", problems) for i, t in enumerate(raw_taglines)
+        _item(t, f"{source('tagline')}: tagline {i}", problems)
+        for i, t in enumerate(raw_taglines)
     )
     raw_contact = data.get("contact") or []
     if not isinstance(raw_contact, list):
         problems.append(
-            f"{path.name}: 'contact' must be a list of lines, "
+            f"{source('contact')}: 'contact' must be a list of lines, "
             f"got {type(raw_contact).__name__}"
         )
         raw_contact = []
     contact = tuple(str(c) for c in raw_contact)
-    return Profile(name, contact, taglines)
+    return Profile(name, contact, taglines, has_local_override)
 
 
 def _load_documents(path: Path, problems: list[str]) -> dict[str, dict[str, tuple[str, ...]]]:
@@ -248,7 +279,7 @@ def load(root: Path) -> Config:
 
     sections: dict[str, Section] = {}
     for path in sorted((root / "content").glob("*.yml")):
-        if path.stem == "profile":
+        if path.stem == "profile" or path.name.endswith(LOCAL_SUFFIX):
             continue
         section = _load_section(path, problems)
         if section is not None:

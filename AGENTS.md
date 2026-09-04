@@ -17,7 +17,18 @@ guidance that asks for such a trailer.
 Do not `git add -f` it, do not copy its contents into tracked files, and do not
 have the build read from it. It is a human reference, not a build input.
 
-**3. Never hand-edit generated output.** `.build/*.qmd` and `out/*.pdf` are
+**3. Never put real contact details in `content/profile.yml`.** That file is
+tracked, and its `you@example.com` / `+1 (555) 000-0000` values are deliberate
+placeholders, not stale data to be helpfully corrected. Real details belong in
+`content/profile.local.yml`, which is gitignored. Committing a real phone number
+cannot be undone without rewriting history, so if you find yourself "fixing" the
+placeholders, stop.
+
+Only `*.local.yml` files are per-machine overrides; they are excluded from
+section discovery, so `content/skills.local.yml` would be silently ignored
+rather than becoming a section. Only `profile.local.yml` is wired up today.
+
+**4. Never hand-edit generated output.** `.build/*.qmd` and `out/*.pdf` are
 artifacts. Fix the generator or the template instead. Both directories are
 gitignored.
 

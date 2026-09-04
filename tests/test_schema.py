@@ -236,3 +236,47 @@ def test_empty_content_file_is_an_error(tmp_path):
     message = str(excinfo.value)
     assert "skills.yml" in message
     assert "empty" in message.lower()
+
+
+PROFILE_LOCAL = """
+contact:
+  - "Email: [real@cornell.edu](mailto:real@cornell.edu)"
+  - "Phone: +1 (607) 555 0123"
+"""
+
+
+def test_local_profile_absent_uses_tracked_values(tmp_path):
+    profile = load(write_repo(tmp_path)).profile
+    assert profile.has_local_override is False
+    assert profile.contact == ("Email: [x@y.edu](mailto:x@y.edu)",)
+
+
+def test_local_profile_overrides_contact(tmp_path):
+    config = load(write_repo(tmp_path, **{"content/profile.local.yml": PROFILE_LOCAL}))
+    assert config.profile.has_local_override is True
+    assert config.profile.contact == (
+        "Email: [real@cornell.edu](mailto:real@cornell.edu)",
+        "Phone: +1 (607) 555 0123",
+    )
+
+
+def test_partial_local_profile_keeps_untouched_fields(tmp_path):
+    # The override supplies only `contact`; name and taglines must survive.
+    profile = load(write_repo(tmp_path, **{"content/profile.local.yml": PROFILE_LOCAL})).profile
+    assert profile.name == "Chengxuan Li"
+    assert [t.text for t in profile.taglines] == ["Targeted headline", "Default headline"]
+
+
+def test_local_profile_error_names_the_local_file(tmp_path):
+    bad = "contact: not-a-list\n"
+    with pytest.raises(ValidationError) as excinfo:
+        load(write_repo(tmp_path, **{"content/profile.local.yml": bad}))
+    message = str(excinfo.value)
+    assert "profile.local.yml" in message
+    assert "must be a list of lines" in message
+
+
+def test_local_profile_is_not_loaded_as_a_section(tmp_path):
+    config = load(write_repo(tmp_path, **{"content/profile.local.yml": PROFILE_LOCAL}))
+    assert "profile.local" not in config.sections
+    assert sorted(config.sections) == ["experience", "skills"]

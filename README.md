@@ -15,6 +15,38 @@ winget install Posit.Quarto
 pip install -r requirements.txt
 ```
 
+### Contact details
+
+`content/profile.yml` is tracked and carries **placeholder** contact details
+(`you@example.com`, `+1 (555) 000-0000`). Real ones go in
+`content/profile.local.yml`, which is gitignored so your phone number never
+enters the repository:
+
+```yaml
+# content/profile.local.yml
+contact:
+  - "Email: [you@real.edu](mailto:you@real.edu)"
+  - "Phone: +1 (555) 123 4567"
+```
+
+The override is a **shallow top-level merge**: any key present replaces that key
+entirely, so `contact:` swaps the whole list and everything else falls through
+from `profile.yml`. You can override `name` or `tagline` the same way.
+
+This is the one manual step a fresh clone needs. Without it the build still
+succeeds, so it warns on every run:
+
+```
+WARNING: content/profile.local.yml not found - using PLACEHOLDER contact details
+```
+
+Take that warning seriously — it means the PDF you are about to send has a fake
+phone number on it. When the override is found, the build names it instead:
+
+```
+contact: content/profile.local.yml
+```
+
 ## Build
 
 ```bash
@@ -138,6 +170,7 @@ build.py         CLI entry point
 cvgen/           marker.py  schema.py  select.py  emit.py
 variants.yml     which documents exist, and their section order
 content/         profile.yml + one file per section
+                 profile.local.yml — real contact details, gitignored
 templates/       cv.typ (all styling)  cv.lua (markdown → Typst bridge)
 tests/           pytest suite
 resources/       private reference material — gitignored, never tracked

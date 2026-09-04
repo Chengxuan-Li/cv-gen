@@ -1,6 +1,9 @@
 # Private reference materials - never tracked
 resources/
 
+# Per-machine overrides holding real contact details
+content/*.local.yml
+
 # Generated intermediates and rendered output
 .build/
 out/

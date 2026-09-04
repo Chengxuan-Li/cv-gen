@@ -22,6 +22,7 @@ from cvgen.select import SelectionError, select
 BUILD_DIR = Path(".build")
 OUT_DIR = Path("out")
 FALLBACK_QUARTO = Path(r"C:\Program Files\Quarto\bin\quarto.exe")
+LOCAL_PROFILE = "content/profile.local.yml"
 
 
 class BuildError(Exception):
@@ -89,6 +90,21 @@ def build_one(config: Config, quarto: str, length: str, variant: str) -> Path:
     return pdf
 
 
+def report_contact_source(config: Config) -> None:
+    """Say which file supplied the contact details, every run.
+
+    The dangerous outcome here is sending someone a CV carrying the placeholder
+    phone number, so a missing override is announced loudly rather than assumed.
+    """
+    if config.profile.has_local_override:
+        print(f"contact: {LOCAL_PROFILE}")
+    else:
+        print(
+            f"WARNING: {LOCAL_PROFILE} not found - using PLACEHOLDER contact details",
+            file=sys.stderr,
+        )
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--all", action="store_true", help="build every declared document")
@@ -104,6 +120,8 @@ def main(argv: list[str] | None = None) -> int:
     except ValidationError as exc:
         print(f"content is invalid:\n{exc}", file=sys.stderr)
         return 1
+
+    report_contact_source(config)
 
     if args.check:
         problems: list[str] = []

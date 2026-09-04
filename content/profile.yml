@@ -1,7 +1,15 @@
+# Tracked template. The contact details below are DELIBERATE PLACEHOLDERS and
+# are meant to look obviously fake, so they are unmistakable if one ever reaches
+# a rendered PDF.
+#
+# Put your real email and phone in content/profile.local.yml, which is
+# gitignored. That file shallow-overrides top-level keys here, so it usually
+# needs nothing but a `contact:` block. The build prints a warning on every run
+# when it is missing.
 name: Chengxuan Li
 contact:
-  - "Email: [cl2749@cornell.edu](mailto:cl2749@cornell.edu)"
-  - "Phone: +1 (607) 227 5495"
+  - "Email: [you@example.com](mailto:you@example.com)"
+  - "Phone: +1 (555) 000-0000"
 # A list: the first tagline passing both gates wins. Put targeted lines above
 # the unmarked fallback.
 tagline:

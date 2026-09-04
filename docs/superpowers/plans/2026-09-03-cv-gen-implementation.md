@@ -1022,7 +1022,7 @@ def build_doc() -> Document:
         name="cv-long-general",
         profile_name="Chengxuan Li",
         tagline="PhD Candidate in Systems Engineering",
-        contact=("Email: [x@y.edu](mailto:x@y.edu)", "Phone: +1 (607) 227 5495"),
+        contact=("Email: [x@y.edu](mailto:x@y.edu)", "Phone: +1 (555) 000-0000"),
         sections=(
             Section("skills", "Technical Skills", "labels", (Label(Marker(), "Programming", "Python, C#"),)),
             Section(
@@ -1328,7 +1328,7 @@ from cvgen.select import Document
 
 doc = Document("long", "general", "cv-long-general", "Chengxuan Li",
     "PhD Candidate in Systems Engineering",
-    ("Email: [cl2749@cornell.edu](mailto:cl2749@cornell.edu)", "Phone: +1 (607) 227 5495"),
+    ("Email: [you@example.com](mailto:you@example.com)", "Phone: +1 (555) 000-0000"),
     (
      Section("skills", "Technical Skills", "labels", (Label(Marker(), "Programming", "Python, C#, .NET"),)),
      Section("experience", "Experience", "entries", (
@@ -1628,8 +1628,8 @@ short:
 ```yaml
 name: Chengxuan Li
 contact:
-  - "Email: [cl2749@cornell.edu](mailto:cl2749@cornell.edu)"
-  - "Phone: +1 (607) 227 5495"
+  - "Email: [you@example.com](mailto:you@example.com)"
+  - "Phone: +1 (555) 000-0000"
 # A list: the first tagline passing both gates wins. Put targeted lines above
 # the unmarked fallback.
 tagline:

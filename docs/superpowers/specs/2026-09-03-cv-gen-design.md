@@ -165,8 +165,8 @@ both gates wins** — this is how a variant retargets its headline:
 ```yaml
 name: Chengxuan Li
 contact:
-  - "Email: [cl2749@cornell.edu](mailto:cl2749@cornell.edu)"
-  - "Phone: +1 (607) 227 5495"
+  - "Email: [you@example.com](mailto:you@example.com)"
+  - "Phone: +1 (555) 000-0000"
 tagline:
   - -[nvidia-pos-1] PhD Candidate in Systems Engineering — GPU-accelerated urban simulation
   - PhD Candidate in Systems Engineering, Minor in Electrical & Computer Engineering
@@ -174,6 +174,34 @@ tagline:
 
 Order matters: targeted taglines are listed before the unmarked fallback. If no
 tagline survives, that is a build error naming `profile.yml`.
+
+#### Keeping contact details out of the repository
+
+`content/profile.yml` is tracked and therefore public if the repository ever is.
+Its contact values are **placeholders** chosen to look obviously fake
+(`you@example.com`, `+1 (555) 000-0000`). Real details live in an untracked
+sibling, `content/profile.local.yml`, matched by the gitignore rule
+`content/*.local.yml`.
+
+The merge is a **shallow top-level key replacement**: a key present in the
+override replaces that key entirely. `contact:` therefore swaps the whole list —
+element-wise merging of a list has no unambiguous meaning, so it is not
+attempted. Error messages name whichever of the two files actually supplied the
+offending key.
+
+The real risk this design introduces is not a build failure but a *successful*
+build carrying fake details into a PDF someone sends to an employer. Two things
+guard against it, and both are load-bearing:
+
+1. The placeholders are unmistakable on sight. Realistic dummy values would be
+   far more dangerous than obviously fake ones.
+2. Every run reports its source — `contact: content/profile.local.yml` when the
+   override is found, and a `WARNING: ... using PLACEHOLDER contact details` on
+   stderr when it is not. The build still succeeds, because a fresh clone must
+   work; the warning is what makes the fallback safe.
+
+`*.local.yml` files are excluded from section discovery, so `profile.local.yml`
+never becomes a section named `profile.local`.
 
 ### variants.yml
 

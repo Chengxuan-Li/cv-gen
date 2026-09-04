@@ -88,3 +88,52 @@ def test_build_one_raises_when_quarto_produces_no_pdf(tmp_path, monkeypatch):
 def test_long_and_short_together_is_rejected():
     with pytest.raises(SystemExit):
         build.main(["--all", "--long", "--short"])
+
+
+VARIANTS_MIN = """
+short:
+  sections: [skills]
+  variants:
+    general: {}
+"""
+PROFILE_MIN = """
+name: X
+contact:
+  - "Email: [you@example.com](mailto:you@example.com)"
+tagline: T
+"""
+SKILLS_MIN = """
+title: Skills
+type: labels
+items:
+  - label: Programming
+    text: Python
+"""
+
+
+def write_min_repo(root, local: str | None = None):
+    (root / "content").mkdir(parents=True, exist_ok=True)
+    (root / "variants.yml").write_text(VARIANTS_MIN, encoding="utf-8")
+    (root / "content" / "profile.yml").write_text(PROFILE_MIN, encoding="utf-8")
+    (root / "content" / "skills.yml").write_text(SKILLS_MIN, encoding="utf-8")
+    if local is not None:
+        (root / "content" / "profile.local.yml").write_text(local, encoding="utf-8")
+    return root
+
+
+def test_warns_when_local_profile_is_missing(tmp_path, capsys, monkeypatch):
+    monkeypatch.chdir(write_min_repo(tmp_path))
+    assert build.main(["--check"]) == 0
+    err = capsys.readouterr().err
+    assert "WARNING" in err
+    assert "profile.local.yml" in err
+    assert "PLACEHOLDER" in err
+
+
+def test_reports_source_when_local_profile_is_present(tmp_path, capsys, monkeypatch):
+    local = 'contact:\n  - "Email: [real@cornell.edu](mailto:real@cornell.edu)"\n'
+    monkeypatch.chdir(write_min_repo(tmp_path, local=local))
+    assert build.main(["--check"]) == 0
+    captured = capsys.readouterr()
+    assert "WARNING" not in captured.err
+    assert "content/profile.local.yml" in captured.out

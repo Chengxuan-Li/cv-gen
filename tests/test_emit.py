@@ -11,7 +11,7 @@ def build_doc() -> Document:
         name="cv-long-general",
         profile_name="Chengxuan Li",
         tagline="PhD Candidate in Systems Engineering",
-        contact=("Email: [x@y.edu](mailto:x@y.edu)", "Phone: +1 (607) 227 5495"),
+        contact=("Email: [x@y.edu](mailto:x@y.edu)", "Phone: +1 (555) 000-0000"),
         sections=(
             Section("skills", "Technical Skills", "labels", (Label(Marker(), "Programming", "Python, C#"),)),
             Section(
