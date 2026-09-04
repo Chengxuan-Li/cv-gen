@@ -86,3 +86,12 @@ def test_every_link_carries_a_visible_mark(built):
     assert "#show link: it => [#link-mark" in typ
     # The rule is worthless if the document has no links to apply it to.
     assert typ.count("#link(") > 5
+
+
+def test_the_link_icon_is_staged_beside_the_generated_typst(built):
+    """cv.typ references it with a bare path, which only resolves inside .build/."""
+    icon = ROOT / ".build" / "link-icon.svg"
+    assert icon.exists(), "link-icon.svg was not staged; Typst cannot resolve it"
+    assert icon.read_bytes() == (ROOT / "templates" / "link-icon.svg").read_bytes()
+    typ = (ROOT / ".build" / "cv-long-general.typ").read_text(encoding="utf-8")
+    assert 'image("link-icon.svg"' in typ

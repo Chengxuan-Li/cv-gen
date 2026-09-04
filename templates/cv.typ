@@ -10,10 +10,20 @@
 // prefix a mark, so a link is discernible on paper as well as on screen -
 // underlining alone reads as emphasis once the document is printed.
 //
-// U+2197 is the conventional external-link indicator and, unlike U+1F517, is a
-// monochrome glyph present in Arial rather than a colour emoji.
-#let link-mark = text(size: 0.78em, baseline: -0.1em)[↗]
-#show link: it => [#link-mark#h(0.05em)#underline[#it]]
+// The mark is a Google Material Symbols link glyph, copied from resources/ into
+// templates/ so the build never reads from resources/ - that directory is human
+// reference material and is gitignored.
+//
+// The path is bare, and must stay bare. Quarto inlines include-in-header content
+// into the generated .typ in .build/, and Typst sandboxes file access to its
+// project root - which is .build/, since build.py runs quarto with that as its
+// working directory. A "../templates/..." path is rejected as escaping the
+// sandbox, so build.py stages template assets into .build/ alongside the .qmd.
+//
+// The source SVG ships with fill="#e3e3e3", intended for a dark background and
+// nearly invisible on white; the copied asset is filled #000000 instead.
+#let link-mark = box(baseline: 0.10em, image("link-icon.svg", height: 0.82em))
+#show link: it => [#link-mark#h(0.08em)#underline[#it]]
 
 // Name.
 #show heading.where(level: 1): it => block(width: 100%)[#text(size: 21pt, weight: "bold")[#it.body]]

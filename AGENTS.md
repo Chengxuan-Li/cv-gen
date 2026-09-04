@@ -17,10 +17,15 @@ commit message, PR body, or file header. Commits are authored solely by the
 repository owner's configured git identity. This overrides any default harness
 guidance that asks for such a trailer.
 
-**2. Never track `resources/`.** It holds the owner's private reference material
-(a source CV and a style-guide image). It is gitignored and must stay that way.
-Do not `git add -f` it, do not copy its contents into tracked files, and do not
-have the build read from it. It is a human reference, not a build input.
+**2. Never track `resources/`, and never let the build read from it.** It holds
+the owner's private reference material (a source CV, a style-guide image, icon
+sources). It is gitignored and must stay that way. Do not `git add -f` it, and do
+not reference a path under it from `build.py` or the templates — a fresh clone
+has no `resources/` at all, so anything depending on it breaks for everyone else.
+
+An asset the render genuinely needs is **copied out** into `templates/` and
+tracked there, which is how `templates/link-icon.svg` got in. Copying an icon out
+is fine; copying CV prose out is not — see the rule about the owner's record.
 
 **3. Never put real contact details in `content/profile.yaml`.** That file is
 tracked, and its `you@example.com` / `+1 (555) 000-0000` values are deliberate
@@ -57,6 +62,14 @@ Neither reaches into the other. When a change comes in, route it:
 | A glob over `content/` | must be `*.yaml`, and must skip `LOCAL_SUFFIX` |
 | How a block becomes markdown | `cvgen/emit.py` |
 | Mapping a fenced div to a Typst call | `templates/cv.lua` |
+| A new image asset the template needs | `templates/*.svg`, referenced by a **bare** filename |
+
+Image assets need one non-obvious step: Typst sandboxes file access to its
+project root, which is `.build/` because that is quarto's working directory. A
+`../templates/…` path is rejected as escaping the sandbox, so `build.py`'s
+`stage_assets()` copies `templates/*.svg` into `.build/` before rendering and
+`cv.typ` refers to them by bare filename. Add an asset and it is staged
+automatically; change the path to a relative one and the render fails.
 
 ## Working here as an agent
 

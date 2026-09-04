@@ -34,6 +34,7 @@ from cvgen.select import SelectionError, select
 
 BUILD_DIR = Path(".build")
 OUT_DIR = Path("out")
+TEMPLATE_DIR = Path("templates")
 FALLBACK_QUARTO = Path(r"C:\Program Files\Quarto\bin\quarto.exe")
 LOCAL_PROFILE = "content/profile.local.yaml"
 
@@ -71,10 +72,27 @@ def documents_for(config: Config, length: str | None, variant: str | None) -> li
     return documents
 
 
+def stage_assets() -> list[Path]:
+    """Copy template assets next to the generated .qmd.
+
+    Typst sandboxes file access to its project root, which is BUILD_DIR because
+    that is quarto's working directory here. An asset referenced from cv.typ
+    therefore cannot live in templates/ and be reached with '../' - it has to sit
+    inside the sandbox, so it is staged rather than referenced in place.
+    """
+    staged = []
+    for asset in sorted(TEMPLATE_DIR.glob("*.svg")):
+        target = BUILD_DIR / asset.name
+        target.write_bytes(asset.read_bytes())
+        staged.append(target)
+    return staged
+
+
 def build_one(config: Config, quarto: str, length: str, variant: str) -> Path:
     doc = select(config, length, variant)
     BUILD_DIR.mkdir(exist_ok=True)
     OUT_DIR.mkdir(exist_ok=True)
+    stage_assets()
     qmd = BUILD_DIR / f"{doc.name}.qmd"
     qmd.write_text(render(doc), encoding="utf-8")
 

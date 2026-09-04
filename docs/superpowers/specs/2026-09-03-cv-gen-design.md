@@ -246,7 +246,7 @@ cv-gen/
                         publications.yaml awards.yaml education.yaml
                         profile.local.yaml (untracked, real contact details)
   schema/               generated JSON Schema, never hand-edited
-  templates/            cv.typ  cv.lua
+  templates/            cv.typ  cv.lua  link-icon.svg
   tests/                one module per cvgen module, plus test_render.py
   docs/open-questions.md   decisions deliberately left open
   .build/               generated .qmd (ignored)
@@ -381,6 +381,7 @@ into a parser. Exit codes: `0` success, `1` content or build failure, `2` usage.
 | Marker requires trailing whitespace | Makes the grammar unambiguous against `[text](url)` with no escaping. |
 | `general` inherited, not a sibling | Otherwise every targeted variant would start empty and shared content would need listing on every item. |
 | Lua filter rather than emitting raw Typst | Raw Typst blocks would bypass Pandoc, breaking `**bold**` and links inside content. |
+| Template assets staged into `.build/` | Typst sandboxes file access to its project root, which is `.build/`. A `../templates/...` path is rejected as escaping the sandbox, so `stage_assets()` copies them in and `cv.typ` uses bare filenames. |
 | Rendered PDFs gitignored | Repo stays source-only and reproducible. Trivially reversible if linkable PDFs are wanted later. |
 | `.yaml`, not `.yml` | The YAML spec recommends it. Discovery globs `*.yaml` only, and `legacy_yml_extension` reports strays so the choice cannot fail silently. |
 | Content model declared in `spec.py` | The validator and the published JSON Schema derive from one table, so they cannot drift. Adding a field is a one-line edit. |

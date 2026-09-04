@@ -83,6 +83,9 @@ short/general: 15 of 17 items included
   experience/entries[0].bullets[1]  include               unmarked, so inherited from the 'general' base pool
 ```
 
+Links carry a chain icon and an underline, so a DOI or mailto reads as a link
+on paper as well as on screen.
+
 `--lint` catches the two failure modes that pass validation and still produce a
 wrong document: a near-miss marker (`+Design…` with no space), and a real email
 address or phone number sitting in the tracked `profile.yaml`. It looks for those
@@ -243,6 +246,7 @@ content/         profile.yaml + one file per section
                  profile.local.yaml — real contact details, gitignored
 schema/          generated JSON Schema — do not hand-edit
 templates/       cv.typ (all styling)  cv.lua (markdown → Typst bridge)
+                 link-icon.svg — staged into .build/ at render time
 tests/           pytest suite
 resources/       private reference material — gitignored, never tracked
 ```

@@ -216,3 +216,19 @@ def test_schema_writes_every_file(tmp_path, capsys, monkeypatch):
     assert len(written) == 3
     for path in written:
         assert Path(path).exists()
+
+
+def test_stage_assets_copies_template_svgs_into_the_build_dir(tmp_path, monkeypatch):
+    """Typst sandboxes to .build/, so an asset must be inside it, not in templates/."""
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "templates").mkdir()
+    (tmp_path / "templates" / "link-icon.svg").write_text("<svg/>", encoding="utf-8")
+    (tmp_path / "templates" / "cv.typ").write_text("// not an asset", encoding="utf-8")
+    (tmp_path / ".build").mkdir()
+
+    staged = build.stage_assets()
+
+    assert [p.name for p in staged] == ["link-icon.svg"]
+    assert (tmp_path / ".build" / "link-icon.svg").read_text(encoding="utf-8") == "<svg/>"
+    # Only assets are staged; the templates themselves are reached another way.
+    assert not (tmp_path / ".build" / "cv.typ").exists()
