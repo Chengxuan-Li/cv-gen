@@ -47,8 +47,22 @@ def _head(doc: Document) -> list[str]:
 
 
 def _labels(items: tuple[object, ...]) -> list[str]:
-    lines = [f"**{i.label}**: {i.text}  " for i in items if isinstance(i, Label)]
-    return _div(".cv-labels", lines)
+    """One paragraph per label, separated by a blank line.
+
+    These were previously joined with markdown hard line breaks, which made the
+    whole section a single paragraph: every label sat at the template's line
+    height, the spacing meant for *wrapped* lines, so separate skills read as if
+    they were continuations of one another. A blank line makes each its own
+    paragraph and lets the wider paragraph gap apply.
+    """
+    body: list[str] = []
+    for item in items:
+        if not isinstance(item, Label):
+            continue
+        if body:
+            body.append("")
+        body.append(f"**{item.label}**: {item.text}")
+    return _div(".cv-labels", body)
 
 
 def _entry(entry: Entry) -> list[str]:

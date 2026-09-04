@@ -16,9 +16,13 @@
 // ordering by overriding leading per wrapper, which made line height differ
 // between sections - awards were set at 0.3em against 0.52em elsewhere. The
 // separation now comes entirely from block spacing, so leading is uniform.
-#let LEADING = 0.44em
-#let PARA-GAP = 0.54em
-#let ENTRY-GAP = 0.78em
+// Derived from one base at exact ratios, rather than three decimals tuned until
+// the page happened to fit. Retuning is a single edit to BASE, and the ordering
+// above cannot be broken by accident because the multipliers enforce it.
+#let BASE = 0.5em
+#let LEADING = 1.0 * BASE // 0.50em
+#let PARA-GAP = 1.5 * BASE // 0.75em
+#let ENTRY-GAP = 2.0 * BASE // 1.00em
 
 #set par(leading: LEADING, spacing: PARA-GAP, justify: false)
 #set list(indent: 0.55em, body-indent: 0.42em, spacing: PARA-GAP, marker: [•])
