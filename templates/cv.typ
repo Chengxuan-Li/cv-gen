@@ -65,8 +65,16 @@
 // span the full text width. Putting the whole entry in the grid's 1fr column
 // would narrow every bullet by the width of the date beside it, wrapping long
 // bullets a word or two early for no reason.
-#let cv-entry(dates: [], head: [], body) = block(width: 100%, above: 0.42em, below: 0.22em)[
-  #set par(justify: false)
+//
+// An entry has to read as one unit, so - as with cv-row - the space *inside* it
+// is tighter than the space *between* entries. `below` carries that separation
+// rather than `above`: Typst collapses adjacent block spacing to the larger of
+// the two, so raising `below` opens the gap after the last bullet while leaving
+// heading-to-first-entry and entry-to-next-heading alone. Raising `above` would
+// loosen all three. The tighter internal spacing is also what buys the vertical
+// room for the wider gap without pushing the short CV onto a second page.
+#let cv-entry(dates: [], head: [], body) = block(width: 100%, above: 0.42em, below: 0.72em)[
+  #set par(justify: false, spacing: 0.3em)
   #grid(columns: (1fr, auto), head, align(top + end)[#dates])
   #body
 ]
