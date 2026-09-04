@@ -7,18 +7,20 @@ entries:
     dates: Aug 2024 – Present
     role: PhD, Systems Engineering; Minor in Electrical and Computer Engineering
     bullets:
-      - + Research focused on machine learning, scientific computing, simulation, and computational optimization for energy and infrastructure systems.
-      - + Coursework spanning deep learning, computer vision, signal processing, Monte Carlo simulation, power systems, and applied optimization.
+      - >-
+        + Selected coursework: Deep Learning, Computer Vision, Signal Processing,
+        Monte Carlo Simulation, Power Systems, Applied Optimization.
   - org: Architectural Association
     location: London, UK
     dates: Jun 2024
     role: M.Arch
     bullets:
-      - + Energy engineering and benchmarking; net-zero building operations and optimization; Post-Occupancy Evaluation (POE).
+      - >-
+        + Selected focus across the M.Arch and BA (Hons): building energy
+        modeling, building physics, renewable energy systems, net-zero
+        operations, and post-occupancy evaluation.
   - org: Architectural Association
     location: London, UK
     dates: Jun 2022
     role: BA (Hons)
-    mark: "+"
-    bullets:
-      - Renewable energy systems and building energy modeling; building physics and energy performance simulation; environmental and sustainable buildings.
+    #mark: "+"
