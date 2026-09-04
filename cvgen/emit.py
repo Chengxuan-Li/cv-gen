@@ -17,7 +17,7 @@ format:
     margin:
       x: 1.6cm
       y: 1.4cm
-    mainfont: Arial
+    mainfont: Garamond
     fontsize: 10pt
     include-in-header: {template_dir}/cv.typ
     filters: [{template_dir}/cv.lua]
