@@ -22,8 +22,11 @@
 //
 // The source SVG ships with fill="#e3e3e3", intended for a dark background and
 // nearly invisible on white; the copied asset is filled #000000 instead.
+// The mark trails the text: a reader takes in the label first and the icon then
+// confirms it is a link, rather than the icon interrupting the line before the
+// word it belongs to.
 #let link-mark = box(baseline: 0.10em, image("link-icon.svg", height: 0.82em))
-#show link: it => [#link-mark#h(0.08em)#underline[#it]]
+#show link: it => [#underline[#it]#h(0.08em)#link-mark]
 
 // Name.
 #show heading.where(level: 1): it => block(width: 100%)[#text(size: 21pt, weight: "bold")[#it.body]]

@@ -6,6 +6,8 @@ from pathlib import Path
 import pytest
 
 import build
+from cvgen.schema import load
+from cvgen.select import select
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -59,14 +61,25 @@ def test_short_variant_is_one_page(built):
     assert page_count(short) == 1
 
 
-def test_long_and_short_have_their_declared_section_sets(built):
-    qmd_long = (ROOT / ".build" / "cv-long-general.qmd").read_text(encoding="utf-8")
-    qmd_short = (ROOT / ".build" / "cv-short-general.qmd").read_text(encoding="utf-8")
-    assert "## Selected Publications" in qmd_long
-    assert "## Selected Publications" in qmd_short
-    assert "## Submitted Abstracts" in qmd_long
-    assert "## Submitted Abstracts" not in qmd_short
-    assert "## Research & Professional Experience" in qmd_short
+@pytest.mark.parametrize("length", ["long", "short"])
+def test_each_document_contains_exactly_its_declared_sections(built, length):
+    """Derived from variants.yaml rather than hardcoded.
+
+    An earlier version listed section titles literally, so simply dropping a
+    section from variants.yaml failed a test that had nothing to say about the
+    change. What is worth pinning is the mechanism: a document renders the
+    sections it declares, in order, and nothing else.
+    """
+    config = load(ROOT)
+    doc = select(config, length, "general")
+    qmd = (ROOT / ".build" / f"cv-{length}-general.qmd").read_text(encoding="utf-8")
+
+    rendered = [line[3:] for line in qmd.splitlines() if line.startswith("## ")]
+    assert rendered == [s.title for s in doc.sections]
+
+    undeclared = set(config.sections) - {s.name for s in doc.sections}
+    for name in undeclared:
+        assert f"## {config.sections[name].title}" not in qmd
 
 
 def test_markdown_survives_into_the_document(built):
@@ -76,14 +89,15 @@ def test_markdown_survives_into_the_document(built):
 
 
 def test_every_link_carries_a_visible_mark(built):
-    """Underlining alone reads as emphasis on paper, so links get a leading mark.
+    """Underlining alone reads as emphasis on paper, so links get a trailing mark.
 
     Asserted against the generated .typ rather than templates/cv.typ, so this
     fails if the rule stops reaching the pipeline as well as if it is deleted.
     """
     typ = (ROOT / ".build" / "cv-long-general.typ").read_text(encoding="utf-8")
     assert "#let link-mark" in typ
-    assert "#show link: it => [#link-mark" in typ
+    # The mark trails the link text; pinned so the order is not flipped silently.
+    assert "#show link: it => [#underline[#it]#h(0.08em)#link-mark]" in typ
     # The rule is worthless if the document has no links to apply it to.
     assert typ.count("#link(") > 5
 
