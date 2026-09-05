@@ -8,6 +8,7 @@
 # needs nothing but a `contact:` block. The build prints a warning on every run
 # when it is missing.
 name: Chengxuan Li
+anticipated_graduation: May 2028
 contact:
   - "Email: [you@example.com](mailto:you@example.com)"
   - "Phone: +1 (555) 000-0000"

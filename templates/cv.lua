@@ -8,6 +8,10 @@ local function raw(text)
   return pandoc.RawBlock("typst", text)
 end
 
+local function raw_inline(text)
+  return pandoc.RawInline("typst", text)
+end
+
 local function append(out, blocks)
   for _, block in ipairs(blocks or {}) do
     table.insert(out, block)
@@ -82,5 +86,16 @@ function Div(el)
     return wrap("#cv-prose[", el.content, "]")
   elseif classes:includes("cv-labels") then
     return wrap("#cv-labels[", el.content, "]")
+  end
+end
+
+function Span(el)
+  if el.classes:includes("cv-graduation") then
+    local out = { raw_inline("#cv-graduation[") }
+    for _, inline in ipairs(el.content) do
+      table.insert(out, inline)
+    end
+    table.insert(out, raw_inline("]"))
+    return out
   end
 end

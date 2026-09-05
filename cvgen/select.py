@@ -25,6 +25,7 @@ class Document:
     tagline: str
     contact: tuple[str, ...]
     sections: tuple[Section, ...]
+    anticipated_graduation: str = ""
 
 
 def includes(marker: Marker, length: str, variant: str) -> bool:
@@ -93,4 +94,5 @@ def select(config: Config, length: str, variant: str) -> Document:
         tagline=tagline,
         contact=config.profile.contact,
         sections=sections,
+        anticipated_graduation=config.profile.anticipated_graduation,
     )

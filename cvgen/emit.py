@@ -40,7 +40,13 @@ def _div(classes: str, body: list[str], **attrs: str) -> list[str]:
 
 
 def _head(doc: Document) -> list[str]:
-    left = _div(".cv-head-left", [f"# {doc.profile_name}", "", doc.tagline])
+    name = f"# {doc.profile_name}"
+    if doc.anticipated_graduation:
+        name += (
+            " [Anticipated graduation: "
+            f"{doc.anticipated_graduation}]{{.cv-graduation}}"
+        )
+    left = _div(".cv-head-left", [name, "", doc.tagline])
     # Two trailing spaces make each contact line a markdown hard line break.
     right = _div(".cv-head-right", [f"{line}  " for line in doc.contact])
     return _div(".cv-head", [*left, *right])

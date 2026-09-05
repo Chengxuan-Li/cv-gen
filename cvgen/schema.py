@@ -96,6 +96,7 @@ class Profile:
     contact: tuple[str, ...]
     taglines: tuple[Item, ...]
     has_local_override: bool = False
+    anticipated_graduation: str = ""
 
 
 @dataclass(frozen=True)
@@ -352,7 +353,14 @@ def _load_profile(
         )
         raw_contact = []
     contact = tuple(str(c) for c in raw_contact)
-    return Profile(name, contact, taglines, has_local_override)
+    anticipated_graduation = str(data.get("anticipated_graduation", ""))
+    return Profile(
+        name,
+        contact,
+        taglines,
+        has_local_override,
+        anticipated_graduation,
+    )
 
 
 def _load_documents(

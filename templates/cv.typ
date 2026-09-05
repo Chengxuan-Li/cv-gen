@@ -54,6 +54,13 @@
 // Name.
 #show heading.where(level: 1): it => block(width: 100%)[#text(size: 21pt, weight: "bold", tracking: 0em)[#it.body]]
 
+// Graduation timing stays on the name's baseline but reads as supporting
+// information rather than part of the name itself.
+#let cv-graduation(body) = [
+  #h(0.55em)
+  #text(size: 9pt, weight: "regular", tracking: 0em)[#body]
+]
+
 // Suppress page numbering. Quarto's own boilerplate issues a later
 // `#set page(numbering: "1")` (Typst #set rules merge per field, so that
 // call would silently re-enable a plain `numbering: none` here); setting

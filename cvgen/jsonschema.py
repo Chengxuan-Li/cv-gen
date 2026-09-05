@@ -116,6 +116,10 @@ def profile_schema() -> dict:
         "type": "object",
         "properties": {
             "name": {"type": "string"},
+            "anticipated_graduation": {
+                "type": "string",
+                "description": "Expected graduation date shown beside the name.",
+            },
             "contact": {
                 "type": "array",
                 "items": {"type": "string"},

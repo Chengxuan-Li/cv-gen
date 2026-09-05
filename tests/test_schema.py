@@ -122,6 +122,15 @@ def test_taglines_keep_order(tmp_path):
     assert [t.text for t in config.profile.taglines] == ["Targeted headline", "Default headline"]
 
 
+def test_anticipated_graduation_is_loaded_from_profile(tmp_path):
+    profile = PROFILE.replace(
+        "name: Chengxuan Li\n",
+        "name: Chengxuan Li\nanticipated_graduation: May 2028\n",
+    )
+    config = load(write_repo(tmp_path, **{"content/profile.yaml": profile}))
+    assert config.profile.anticipated_graduation == "May 2028"
+
+
 def test_undeclared_variant_is_an_error(tmp_path):
     bad = EXPERIENCE.replace("+[gev-pos-1]", "+[gev-pos-9]")
     with pytest.raises(ValidationError) as excinfo:

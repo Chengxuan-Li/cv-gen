@@ -1,3 +1,5 @@
+from dataclasses import replace
+
 from cvgen.emit import render
 from cvgen.marker import Marker
 from cvgen.schema import Entry, Item, Label, Section
@@ -53,6 +55,12 @@ def test_head_carries_name_tagline_and_contact():
     assert "PhD Candidate in Systems Engineering" in out
     assert "::: {.cv-head-right}" in out
     assert "Email: [x@y.edu](mailto:x@y.edu)  " in out  # hard line break
+
+
+def test_head_places_anticipated_graduation_after_name():
+    doc = replace(build_doc(), anticipated_graduation="May 2028")
+    out = render(doc)
+    assert "# Chengxuan Li [Anticipated graduation: May 2028]{.cv-graduation}" in out
 
 
 def test_sections_render_in_order_with_headings():

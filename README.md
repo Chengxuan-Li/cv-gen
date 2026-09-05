@@ -31,7 +31,8 @@ contact:
 
 The override is a **shallow top-level merge**: any key present replaces that key
 entirely, so `contact:` swaps the whole list and everything else falls through
-from `profile.yaml`. You can override `name` or `tagline` the same way.
+from `profile.yaml`. You can override `name`, `anticipated_graduation`, or
+`tagline` the same way.
 
 One consequence worth knowing: because `contact:` is replaced wholesale, a
 non-sensitive line kept in the tracked file — a personal website, say — is
