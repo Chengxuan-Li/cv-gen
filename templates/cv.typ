@@ -23,6 +23,7 @@
 #let LEADING = 1.0 * BASE // 0.50em
 #let PARA-GAP = 1.5 * BASE // 0.75em
 #let ENTRY-GAP = 2.0 * BASE // 1.00em
+#let TAGLINE-TRACKING = -0.015em
 
 #set par(leading: LEADING, spacing: PARA-GAP, justify: false)
 #set list(indent: 0.55em, body-indent: 0.42em, spacing: PARA-GAP, marker: [•])
@@ -51,7 +52,7 @@
 #show link: it => [#underline[#it]#h(0.08em)#link-mark]
 
 // Name.
-#show heading.where(level: 1): it => block(width: 100%)[#text(size: 21pt, weight: "bold")[#it.body]]
+#show heading.where(level: 1): it => block(width: 100%)[#text(size: 21pt, weight: "bold", tracking: 0em)[#it.body]]
 
 // Suppress page numbering. Quarto's own boilerplate issues a later
 // `#set page(numbering: "1")` (Typst #set rules merge per field, so that
@@ -78,7 +79,10 @@
   #set par(justify: false)
   #grid(
     columns: (1fr, auto),
-    align(bottom)[#left],
+    align(bottom)[
+      #set text(tracking: TAGLINE-TRACKING)
+      #left
+    ],
     align(bottom + end)[#text(size: 9pt)[#right]],
   )
 ]

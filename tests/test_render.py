@@ -112,6 +112,14 @@ def test_every_link_carries_a_visible_mark(built):
     assert typ.count("#link(") > 5
 
 
+def test_tagline_tracking_is_tighter_than_the_name(built):
+    """The long tagline is condensed without changing the name's spacing."""
+    typ = (ROOT / ".build" / "cv-long-general.typ").read_text(encoding="utf-8")
+    assert "#let TAGLINE-TRACKING = -0.015em" in typ
+    assert '#text(size: 21pt, weight: "bold", tracking: 0em)' in typ
+    assert "#set text(tracking: TAGLINE-TRACKING)" in typ
+
+
 def test_the_link_icon_is_staged_beside_the_generated_typst(built):
     """cv.typ references it with a bare path, which only resolves inside .build/."""
     icon = ROOT / ".build" / "link-icon.svg"
