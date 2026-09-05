@@ -21,9 +21,15 @@ def built() -> list[Path]:
     return sorted((ROOT / "out").glob("*.pdf"))
 
 
-def test_every_declared_document_builds(built):
-    names = {p.name for p in built}
-    assert names == {"cv-long-general.pdf", "cv-short-general.pdf"}
+def test_every_declared_document_builds_in_every_language(built):
+    """Every (length, variant) renders once per declared language, en included
+    and suffixed like the rest - consistency over the pre-localization names."""
+    config = load(ROOT)
+    expected = {
+        f"cv-{length}-{variant}-{lang}.pdf" for length, variant, lang in config.all_renders()
+    }
+    assert {p.name for p in built} == expected
+    assert {"cv-long-general-en.pdf", "cv-long-general-zh.pdf"} <= expected
 
 
 def test_pdfs_are_not_trivial(built):
@@ -67,7 +73,7 @@ def page_count(pdf: Path) -> int:
     ),
 )
 def test_short_variant_is_one_page(built):
-    short = next(p for p in built if p.name == "cv-short-general.pdf")
+    short = next(p for p in built if p.name == "cv-short-general-en.pdf")
     assert page_count(short) == 1
 
 
@@ -82,7 +88,7 @@ def test_each_document_contains_exactly_its_declared_sections(built, length):
     """
     config = load(ROOT)
     doc = select(config, length, "general")
-    qmd = (ROOT / ".build" / f"cv-{length}-general.qmd").read_text(encoding="utf-8")
+    qmd = (ROOT / ".build" / f"cv-{length}-general-en.qmd").read_text(encoding="utf-8")
 
     rendered = [line[3:] for line in qmd.splitlines() if line.startswith("## ")]
     assert rendered == [s.title for s in doc.sections]
@@ -93,7 +99,7 @@ def test_each_document_contains_exactly_its_declared_sections(built, length):
 
 
 def test_markdown_survives_into_the_document(built):
-    qmd = (ROOT / ".build" / "cv-long-general.qmd").read_text(encoding="utf-8")
+    qmd = (ROOT / ".build" / "cv-long-general-en.qmd").read_text(encoding="utf-8")
     assert "**CBRE GWS**" in qmd
     assert "[DOI: 10.1080/19401493.2025.2536261]" in qmd
 
@@ -104,7 +110,7 @@ def test_every_link_carries_a_visible_mark(built):
     Asserted against the generated .typ rather than templates/cv.typ, so this
     fails if the rule stops reaching the pipeline as well as if it is deleted.
     """
-    typ = (ROOT / ".build" / "cv-long-general.typ").read_text(encoding="utf-8")
+    typ = (ROOT / ".build" / "cv-long-general-en.typ").read_text(encoding="utf-8")
     assert "#let link-mark" in typ
     # The mark trails the link text; pinned so the order is not flipped silently.
     assert "#show link: it => [#underline[#it]#h(0.08em)#link-mark]" in typ
@@ -114,7 +120,7 @@ def test_every_link_carries_a_visible_mark(built):
 
 def test_tagline_tracking_is_tighter_than_the_name(built):
     """The long tagline is condensed without changing the name's spacing."""
-    typ = (ROOT / ".build" / "cv-long-general.typ").read_text(encoding="utf-8")
+    typ = (ROOT / ".build" / "cv-long-general-en.typ").read_text(encoding="utf-8")
     assert "#let TAGLINE-TRACKING = -0.015em" in typ
     assert '#text(size: 21pt, weight: "bold", tracking: 0em)' in typ
     assert "#set text(tracking: TAGLINE-TRACKING)" in typ
@@ -122,7 +128,7 @@ def test_tagline_tracking_is_tighter_than_the_name(built):
 
 @pytest.mark.parametrize("length", ["long", "short"])
 def test_anticipated_graduation_is_styled_beside_name_in_every_mode(built, length):
-    typ = (ROOT / ".build" / f"cv-{length}-general.typ").read_text(encoding="utf-8")
+    typ = (ROOT / ".build" / f"cv-{length}-general-en.typ").read_text(encoding="utf-8")
     assert "#cv-graduation[Anticipated graduation: May 2028]" in typ
     assert "#let cv-graduation" in typ
 
@@ -132,5 +138,5 @@ def test_the_link_icon_is_staged_beside_the_generated_typst(built):
     icon = ROOT / ".build" / "link-icon.svg"
     assert icon.exists(), "link-icon.svg was not staged; Typst cannot resolve it"
     assert icon.read_bytes() == (ROOT / "templates" / "link-icon.svg").read_bytes()
-    typ = (ROOT / ".build" / "cv-long-general.typ").read_text(encoding="utf-8")
+    typ = (ROOT / ".build" / "cv-long-general-en.typ").read_text(encoding="utf-8")
     assert 'image("link-icon.svg"' in typ

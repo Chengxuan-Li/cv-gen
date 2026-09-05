@@ -11,7 +11,25 @@
       "type": "object",
       "properties": {
         "title": {
-          "type": "string",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "object",
+              "description": "Per-language text. 'en' is the source; any declared language may be added and falls back to en when absent.",
+              "propertyNames": {
+                "pattern": "^[a-z]{2}(-[A-Z]{2})?$"
+              },
+              "additionalProperties": {
+                "type": "string"
+              },
+              "required": [
+                "en"
+              ],
+              "minProperties": 1
+            }
+          ],
           "description": "Heading rendered above the section."
         },
         "type": {
@@ -23,12 +41,48 @@
             "type": "object",
             "properties": {
               "label": {
-                "type": "string",
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object",
+                    "description": "Per-language text. 'en' is the source; any declared language may be added and falls back to en when absent.",
+                    "propertyNames": {
+                      "pattern": "^[a-z]{2}(-[A-Z]{2})?$"
+                    },
+                    "additionalProperties": {
+                      "type": "string"
+                    },
+                    "required": [
+                      "en"
+                    ],
+                    "minProperties": 1
+                  }
+                ],
                 "description": "The bolded label before the colon."
               },
               "text": {
-                "type": "string",
-                "description": "Markdown, may carry a marker. A leading '+ ' or '-[variant] ' marker is honoured; the space is required."
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object",
+                    "description": "Per-language text. 'en' is the source; any declared language may be added and falls back to en when absent.",
+                    "propertyNames": {
+                      "pattern": "^[a-z]{2}(-[A-Z]{2})?$"
+                    },
+                    "additionalProperties": {
+                      "type": "string"
+                    },
+                    "required": [
+                      "en"
+                    ],
+                    "minProperties": 1
+                  }
+                ],
+                "description": "Markdown, may carry a marker. A leading '+ ' or '-[variant] ' marker is honoured; the space is required, and it is read from the en text only."
               }
             },
             "required": [
@@ -52,7 +106,25 @@
       "type": "object",
       "properties": {
         "title": {
-          "type": "string",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "object",
+              "description": "Per-language text. 'en' is the source; any declared language may be added and falls back to en when absent.",
+              "propertyNames": {
+                "pattern": "^[a-z]{2}(-[A-Z]{2})?$"
+              },
+              "additionalProperties": {
+                "type": "string"
+              },
+              "required": [
+                "en"
+              ],
+              "minProperties": 1
+            }
+          ],
           "description": "Heading rendered above the section."
         },
         "type": {
@@ -64,19 +136,91 @@
             "type": "object",
             "properties": {
               "org": {
-                "type": "string",
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object",
+                    "description": "Per-language text. 'en' is the source; any declared language may be added and falls back to en when absent.",
+                    "propertyNames": {
+                      "pattern": "^[a-z]{2}(-[A-Z]{2})?$"
+                    },
+                    "additionalProperties": {
+                      "type": "string"
+                    },
+                    "required": [
+                      "en"
+                    ],
+                    "minProperties": 1
+                  }
+                ],
                 "description": "Organisation, rendered bold."
               },
               "location": {
-                "type": "string",
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object",
+                    "description": "Per-language text. 'en' is the source; any declared language may be added and falls back to en when absent.",
+                    "propertyNames": {
+                      "pattern": "^[a-z]{2}(-[A-Z]{2})?$"
+                    },
+                    "additionalProperties": {
+                      "type": "string"
+                    },
+                    "required": [
+                      "en"
+                    ],
+                    "minProperties": 1
+                  }
+                ],
                 "description": "Rendered after the org, unbolded."
               },
               "dates": {
-                "type": "string",
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object",
+                    "description": "Per-language text. 'en' is the source; any declared language may be added and falls back to en when absent.",
+                    "propertyNames": {
+                      "pattern": "^[a-z]{2}(-[A-Z]{2})?$"
+                    },
+                    "additionalProperties": {
+                      "type": "string"
+                    },
+                    "required": [
+                      "en"
+                    ],
+                    "minProperties": 1
+                  }
+                ],
                 "description": "Rendered flush right on the org line."
               },
               "role": {
-                "type": "string",
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object",
+                    "description": "Per-language text. 'en' is the source; any declared language may be added and falls back to en when absent.",
+                    "propertyNames": {
+                      "pattern": "^[a-z]{2}(-[A-Z]{2})?$"
+                    },
+                    "additionalProperties": {
+                      "type": "string"
+                    },
+                    "required": [
+                      "en"
+                    ],
+                    "minProperties": 1
+                  }
+                ],
                 "description": "Rendered italic on its own line."
               },
               "mark": {
@@ -87,7 +231,25 @@
               "bullets": {
                 "type": "array",
                 "items": {
-                  "type": "string"
+                  "oneOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "object",
+                      "description": "Per-language text. 'en' is the source; any declared language may be added and falls back to en when absent.",
+                      "propertyNames": {
+                        "pattern": "^[a-z]{2}(-[A-Z]{2})?$"
+                      },
+                      "additionalProperties": {
+                        "type": "string"
+                      },
+                      "required": [
+                        "en"
+                      ],
+                      "minProperties": 1
+                    }
+                  ]
                 },
                 "description": "Markdown bullets, each may carry a marker."
               }
@@ -115,7 +277,25 @@
       "type": "object",
       "properties": {
         "title": {
-          "type": "string",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "object",
+              "description": "Per-language text. 'en' is the source; any declared language may be added and falls back to en when absent.",
+              "propertyNames": {
+                "pattern": "^[a-z]{2}(-[A-Z]{2})?$"
+              },
+              "additionalProperties": {
+                "type": "string"
+              },
+              "required": [
+                "en"
+              ],
+              "minProperties": 1
+            }
+          ],
           "description": "Heading rendered above the section."
         },
         "type": {
@@ -131,13 +311,63 @@
               },
               {
                 "type": "object",
+                "description": "Localized shorthand for {text: ...}.",
+                "propertyNames": {
+                  "pattern": "^[a-z]{2}(-[A-Z]{2})?$"
+                },
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "required": [
+                  "en"
+                ],
+                "minProperties": 1
+              },
+              {
+                "type": "object",
                 "properties": {
                   "text": {
-                    "type": "string",
-                    "description": "Markdown, may carry a marker. A leading '+ ' or '-[variant] ' marker is honoured; the space is required."
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "object",
+                        "description": "Per-language text. 'en' is the source; any declared language may be added and falls back to en when absent.",
+                        "propertyNames": {
+                          "pattern": "^[a-z]{2}(-[A-Z]{2})?$"
+                        },
+                        "additionalProperties": {
+                          "type": "string"
+                        },
+                        "required": [
+                          "en"
+                        ],
+                        "minProperties": 1
+                      }
+                    ],
+                    "description": "Markdown, may carry a marker. A leading '+ ' or '-[variant] ' marker is honoured; the space is required, and it is read from the en text only."
                   },
                   "date": {
-                    "type": "string",
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "object",
+                        "description": "Per-language text. 'en' is the source; any declared language may be added and falls back to en when absent.",
+                        "propertyNames": {
+                          "pattern": "^[a-z]{2}(-[A-Z]{2})?$"
+                        },
+                        "additionalProperties": {
+                          "type": "string"
+                        },
+                        "required": [
+                          "en"
+                        ],
+                        "minProperties": 1
+                      }
+                    ],
                     "description": "Rendered flush right on the same line."
                   }
                 },
@@ -163,7 +393,25 @@
       "type": "object",
       "properties": {
         "title": {
-          "type": "string",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "object",
+              "description": "Per-language text. 'en' is the source; any declared language may be added and falls back to en when absent.",
+              "propertyNames": {
+                "pattern": "^[a-z]{2}(-[A-Z]{2})?$"
+              },
+              "additionalProperties": {
+                "type": "string"
+              },
+              "required": [
+                "en"
+              ],
+              "minProperties": 1
+            }
+          ],
           "description": "Heading rendered above the section."
         },
         "type": {
@@ -179,10 +427,42 @@
               },
               {
                 "type": "object",
+                "description": "Localized shorthand for {text: ...}.",
+                "propertyNames": {
+                  "pattern": "^[a-z]{2}(-[A-Z]{2})?$"
+                },
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "required": [
+                  "en"
+                ],
+                "minProperties": 1
+              },
+              {
+                "type": "object",
                 "properties": {
                   "text": {
-                    "type": "string",
-                    "description": "Markdown, may carry a marker. A leading '+ ' or '-[variant] ' marker is honoured; the space is required."
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "object",
+                        "description": "Per-language text. 'en' is the source; any declared language may be added and falls back to en when absent.",
+                        "propertyNames": {
+                          "pattern": "^[a-z]{2}(-[A-Z]{2})?$"
+                        },
+                        "additionalProperties": {
+                          "type": "string"
+                        },
+                        "required": [
+                          "en"
+                        ],
+                        "minProperties": 1
+                      }
+                    ],
+                    "description": "Markdown, may carry a marker. A leading '+ ' or '-[variant] ' marker is honoured; the space is required, and it is read from the en text only."
                   }
                 },
                 "required": [

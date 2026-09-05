@@ -13,6 +13,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from .localize import LANG_CODE, SOURCE_LANG
 from .spec import (
     BLOCKS,
     FLAT,
@@ -38,9 +39,36 @@ FILES = {
 }
 
 
+# A language-keyed map: {en: ..., zh: ...}. The schema admits any two-letter
+# code; the loader enforces the set declared in variants.yaml, which a static
+# schema cannot know. `en` is required because it is the source every other
+# language falls back to. The key pattern is what makes a map standing in for a
+# rows or prose item unambiguous: no field name is two lowercase letters.
+LANG_MAP = {
+    "type": "object",
+    "description": (
+        "Per-language text. 'en' is the source; any declared language may be "
+        "added and falls back to en when absent."
+    ),
+    "propertyNames": {"pattern": LANG_CODE.pattern},
+    "additionalProperties": {"type": "string"},
+    "required": [SOURCE_LANG],
+    "minProperties": 1,
+}
+
+
+def _localized(node: dict) -> dict:
+    """A string node, or the same text as a language map."""
+    description = node.pop("description", None)
+    out: dict = {"oneOf": [node, LANG_MAP]}
+    if description:
+        out["description"] = description
+    return out
+
+
 def _field(spec: FieldSpec) -> dict:
     if spec.kind == MARKED_LIST:
-        node: dict = {"type": "array", "items": {"type": "string"}}
+        node: dict = {"type": "array", "items": _localized({"type": "string"})}
     elif spec.kind == MARK:
         node = {"type": "string", "pattern": MARK_PATTERN}
     else:
@@ -50,8 +78,10 @@ def _field(spec: FieldSpec) -> dict:
     if spec.kind == MARKED:
         node["description"] = (
             f"{spec.doc} A leading '+ ' or '-[variant] ' marker is honoured; "
-            "the space is required."
+            "the space is required, and it is read from the en text only."
         ).strip()
+    if spec.kind == MARKED or spec.translatable:
+        return _localized(node)
     return node
 
 
@@ -66,6 +96,7 @@ def _item(block: BlockSpec) -> dict:
         return {
             "oneOf": [
                 {"type": "string", "description": f"Shorthand for {{{block.text_field}: ...}}."},
+                {**LANG_MAP, "description": f"Localized shorthand for {{{block.text_field}: ...}}."},
                 mapping,
             ]
         }
@@ -78,7 +109,9 @@ def _block(block: BlockSpec) -> dict:
         "description": f"{block.used_by}. Renders as: {block.renders_as}",
         "type": "object",
         "properties": {
-            "title": {"type": "string", "description": "Heading rendered above the section."},
+            "title": _localized(
+                {"type": "string", "description": "Heading rendered above the section."}
+            ),
             "type": {"const": block.type},
             block.items_key: {"type": "array", "items": _item(block)},
         },
@@ -102,7 +135,7 @@ def section_schema() -> dict:
 
 
 def profile_schema() -> dict:
-    marked = {"type": "string"}
+    marked = _localized({"type": "string"})
     return {
         "$schema": DRAFT,
         "$id": "cv-profile.schema.json",
@@ -115,14 +148,16 @@ def profile_schema() -> dict:
         ),
         "type": "object",
         "properties": {
-            "name": {"type": "string"},
-            "anticipated_graduation": {
-                "type": "string",
-                "description": "Expected graduation date shown beside the name.",
-            },
+            "name": _localized({"type": "string"}),
+            "anticipated_graduation": _localized(
+                {
+                    "type": "string",
+                    "description": "Expected graduation date shown beside the name.",
+                }
+            ),
             "contact": {
                 "type": "array",
-                "items": {"type": "string"},
+                "items": _localized({"type": "string"}),
                 "description": "One markdown line per contact method.",
             },
             "tagline": {
@@ -144,10 +179,44 @@ def variants_schema() -> dict:
         "$schema": DRAFT,
         "$id": "cv-variants.schema.json",
         "title": "cv-gen variants file",
-        "description": "variants.yaml: which (length, variant) documents exist.",
+        "description": (
+            "variants.yaml: which (length, variant) documents exist, and which "
+            "languages each renders in."
+        ),
         "type": "object",
         "properties": {
-            length: {
+            "languages": {
+                "type": "object",
+                "description": (
+                    "Output languages. A third axis: every (length, variant) renders "
+                    "once per language. 'en' is the source and is required if this "
+                    "key is present; when absent, English alone is built."
+                ),
+                "propertyNames": {"pattern": LANG_CODE.pattern},
+                "required": [SOURCE_LANG],
+                "additionalProperties": {
+                    "type": ["object", "null"],
+                    "properties": {
+                        "typst": {
+                            "type": "string",
+                            "description": "Typst `lang` code; drives line-breaking (zh for Chinese).",
+                        },
+                        "font": {
+                            "description": "A font, or a fallback stack; Latin first, then CJK.",
+                            "oneOf": [
+                                {"type": "string"},
+                                {"type": "array", "items": {"type": "string"}, "minItems": 1},
+                            ],
+                        },
+                        "sep": {"type": "string", "description": "Between org and location."},
+                        "colon": {"type": "string", "description": "After a skills label."},
+                        "graduation": {"type": "string", "description": "Label beside the name."},
+                    },
+                    "additionalProperties": False,
+                },
+            },
+            **{
+                length: {
                 "type": "object",
                 "properties": {
                     "sections": sections,
@@ -167,9 +236,10 @@ def variants_schema() -> dict:
                 "required": ["sections", "variants"],
                 "additionalProperties": False,
             }
-            for length in LENGTHS
+                for length in LENGTHS
+            },
         },
-        "minProperties": 1,
+        "anyOf": [{"required": [length]} for length in LENGTHS],
         "additionalProperties": False,
     }
 

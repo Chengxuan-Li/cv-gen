@@ -2,9 +2,59 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "cv-variants.schema.json",
   "title": "cv-gen variants file",
-  "description": "variants.yaml: which (length, variant) documents exist.",
+  "description": "variants.yaml: which (length, variant) documents exist, and which languages each renders in.",
   "type": "object",
   "properties": {
+    "languages": {
+      "type": "object",
+      "description": "Output languages. A third axis: every (length, variant) renders once per language. 'en' is the source and is required if this key is present; when absent, English alone is built.",
+      "propertyNames": {
+        "pattern": "^[a-z]{2}(-[A-Z]{2})?$"
+      },
+      "required": [
+        "en"
+      ],
+      "additionalProperties": {
+        "type": [
+          "object",
+          "null"
+        ],
+        "properties": {
+          "typst": {
+            "type": "string",
+            "description": "Typst `lang` code; drives line-breaking (zh for Chinese)."
+          },
+          "font": {
+            "description": "A font, or a fallback stack; Latin first, then CJK.",
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "minItems": 1
+              }
+            ]
+          },
+          "sep": {
+            "type": "string",
+            "description": "Between org and location."
+          },
+          "colon": {
+            "type": "string",
+            "description": "After a skills label."
+          },
+          "graduation": {
+            "type": "string",
+            "description": "Label beside the name."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
     "long": {
       "type": "object",
       "properties": {
@@ -80,6 +130,17 @@
       "additionalProperties": false
     }
   },
-  "minProperties": 1,
+  "anyOf": [
+    {
+      "required": [
+        "long"
+      ]
+    },
+    {
+      "required": [
+        "short"
+      ]
+    }
+  ],
   "additionalProperties": false
 }

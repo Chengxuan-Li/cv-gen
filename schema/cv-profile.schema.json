@@ -6,16 +6,70 @@
   "type": "object",
   "properties": {
     "name": {
-      "type": "string"
+      "oneOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "object",
+          "description": "Per-language text. 'en' is the source; any declared language may be added and falls back to en when absent.",
+          "propertyNames": {
+            "pattern": "^[a-z]{2}(-[A-Z]{2})?$"
+          },
+          "additionalProperties": {
+            "type": "string"
+          },
+          "required": [
+            "en"
+          ],
+          "minProperties": 1
+        }
+      ]
     },
     "anticipated_graduation": {
-      "type": "string",
+      "oneOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "object",
+          "description": "Per-language text. 'en' is the source; any declared language may be added and falls back to en when absent.",
+          "propertyNames": {
+            "pattern": "^[a-z]{2}(-[A-Z]{2})?$"
+          },
+          "additionalProperties": {
+            "type": "string"
+          },
+          "required": [
+            "en"
+          ],
+          "minProperties": 1
+        }
+      ],
       "description": "Expected graduation date shown beside the name."
     },
     "contact": {
       "type": "array",
       "items": {
-        "type": "string"
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "object",
+            "description": "Per-language text. 'en' is the source; any declared language may be added and falls back to en when absent.",
+            "propertyNames": {
+              "pattern": "^[a-z]{2}(-[A-Z]{2})?$"
+            },
+            "additionalProperties": {
+              "type": "string"
+            },
+            "required": [
+              "en"
+            ],
+            "minProperties": 1
+          }
+        ]
       },
       "description": "One markdown line per contact method."
     },
@@ -23,12 +77,48 @@
       "description": "A string, or a list where the first item passing both gates wins.",
       "oneOf": [
         {
-          "type": "string"
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "object",
+              "description": "Per-language text. 'en' is the source; any declared language may be added and falls back to en when absent.",
+              "propertyNames": {
+                "pattern": "^[a-z]{2}(-[A-Z]{2})?$"
+              },
+              "additionalProperties": {
+                "type": "string"
+              },
+              "required": [
+                "en"
+              ],
+              "minProperties": 1
+            }
+          ]
         },
         {
           "type": "array",
           "items": {
-            "type": "string"
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "object",
+                "description": "Per-language text. 'en' is the source; any declared language may be added and falls back to en when absent.",
+                "propertyNames": {
+                  "pattern": "^[a-z]{2}(-[A-Z]{2})?$"
+                },
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "required": [
+                  "en"
+                ],
+                "minProperties": 1
+              }
+            ]
           }
         }
       ]

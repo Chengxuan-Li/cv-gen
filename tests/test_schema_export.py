@@ -88,3 +88,77 @@ def test_flat_items_accept_both_shorthand_and_mapping():
     jsonschema.validate(
         {"title": "X", "type": "rows", "items": [{"text": "a", "date": "May 2026"}]}, schema
     )
+
+
+# --- Localization -----------------------------------------------------------
+
+
+def test_translatable_fields_accept_a_language_map():
+    schema = committed("cv-section.schema.json")
+    jsonschema.validate(
+        {
+            "title": {"en": "Experience", "zh": "经历"},
+            "type": "entries",
+            "entries": [
+                {
+                    "org": {"en": "Cornell", "zh": "康奈尔"},
+                    "location": "Ithaca NY",
+                    "dates": {"en": "Aug 2024", "zh": "2024年8月"},
+                    "role": "PhD",
+                    "bullets": ["plain", {"en": "+ marked", "zh": "翻译"}],
+                }
+            ],
+        },
+        schema,
+    )
+
+
+def test_a_language_map_can_stand_in_for_a_flat_item():
+    schema = committed("cv-section.schema.json")
+    jsonschema.validate(
+        {"title": "P", "type": "prose", "items": [{"en": "Paper.", "zh": "论文。"}]}, schema
+    )
+
+
+@pytest.mark.parametrize(
+    "bad, why",
+    [
+        ({"title": "P", "type": "prose", "items": [{"zh": "论文。"}]}, "map without en"),
+        ({"title": "P", "type": "prose", "items": [{"en": "a", "text": "b"}]}, "mixed keys"),
+        ({"title": "P", "type": "prose", "items": [{"eng": "a"}]}, "three-letter key"),
+        (
+            {"title": "X", "type": "entries", "entries": [{"org": "A", "location": "B",
+             "dates": "C", "role": "D", "mark": {"en": "+", "zh": "+"}}]},
+            "mark is never localized",
+        ),
+    ],
+)
+def test_schema_rejects_malformed_language_maps(bad, why):
+    with pytest.raises(jsonschema.ValidationError):
+        jsonschema.validate(bad, committed("cv-section.schema.json"))
+
+
+def test_variants_schema_accepts_and_constrains_languages():
+    schema = committed("cv-variants.schema.json")
+    base = {"short": {"sections": ["skills"], "variants": {"general": {}}}}
+    jsonschema.validate(
+        {**base, "languages": {"en": {"typst": "en", "font": "Garamond"},
+                               "zh": {"typst": "zh", "font": ["Garamond", "Noto Serif SC"]}}},
+        schema,
+    )
+    with pytest.raises(jsonschema.ValidationError):  # en is the required source
+        jsonschema.validate({**base, "languages": {"zh": {"typst": "zh"}}}, schema)
+    with pytest.raises(jsonschema.ValidationError):  # unknown per-language key
+        jsonschema.validate({**base, "languages": {"en": {"typeface": "x"}}}, schema)
+
+
+def test_profile_schema_accepts_localized_name_and_contact():
+    jsonschema.validate(
+        {
+            "name": {"en": "Chengxuan Li", "zh": "李承轩"},
+            "contact": ["Email: x", {"en": "Web: y", "zh": "网站：y"}],
+            "tagline": [{"en": "A", "zh": "甲"}, "B"],
+            "anticipated_graduation": {"en": "May 2028", "zh": "2028年5月"},
+        },
+        committed("cv-profile.schema.json"),
+    )

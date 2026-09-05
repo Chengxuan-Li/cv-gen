@@ -169,3 +169,83 @@ def test_divs_are_balanced_and_correctly_nested():
     # Verify that .cv-head-left appears before .cv-head-right
     assert head_children_order == [".cv-head-left", ".cv-head-right"], \
         f".cv-head children must appear in order [.cv-head-left, .cv-head-right], got {head_children_order}"
+
+
+# --- Localization -----------------------------------------------------------
+
+from cvgen.localize import LStr, language_spec  # noqa: E402
+
+ZH = language_spec("zh", {"typst": "zh", "font": ["Garamond", "Noto Serif SC"]})
+
+
+def build_zh_doc() -> Document:
+    """A document with some strings translated and some deliberately not."""
+    return Document(
+        length="long",
+        variant="general",
+        name="cv-long-general",
+        profile_name=LStr("Chengxuan Li", {"zh": "李承轩"}),
+        tagline=LStr("PhD Candidate", {"zh": "博士生"}),
+        contact=(LStr("Email: [x@y.edu](mailto:x@y.edu)"),),  # untranslated: falls back
+        sections=(
+            Section(
+                "skills",
+                LStr("Technical Skills", {"zh": "技术能力"}),
+                "labels",
+                (Label(Marker(), LStr("Programming", {"zh": "编程"}), LStr("Python, C#")),),
+            ),
+            Section(
+                "experience",
+                LStr("Experience", {"zh": "经历"}),
+                "entries",
+                (
+                    Entry(
+                        Marker(),
+                        LStr("Cornell University", {"zh": "康奈尔大学"}),
+                        LStr("Ithaca NY"),
+                        LStr("Aug 2024 - Present", {"zh": "2024年8月 - 至今"}),
+                        LStr("PhD Researcher", {"zh": "博士研究员"}),
+                        (Item(Marker(), LStr("A bullet", {"zh": "一条要点"})),),
+                    ),
+                ),
+            ),
+        ),
+        anticipated_graduation=LStr("May 2028", {"zh": "2028年5月"}),
+    )
+
+
+def test_default_language_is_english_and_emits_lang_and_font_block():
+    out = render(build_zh_doc())
+    assert "lang: en" in out
+    assert 'mainfont' not in out  # the font stack is a body-level set instead
+    assert '#set text(font: ("Garamond"))' in out
+    assert "# Chengxuan Li" in out
+    assert "**Cornell University**, Ithaca NY" in out
+
+
+def test_chinese_render_resolves_translations_and_chrome():
+    out = render(build_zh_doc(), lang=ZH)
+    assert "lang: zh" in out
+    assert '#set text(font: ("Garamond", "Noto Serif SC"))' in out
+    assert "# 李承轩 [预计毕业：2028年5月]{.cv-graduation}" in out
+    assert "博士生" in out
+    assert "## 技术能力" in out and "## 经历" in out
+    assert "**编程**：Python, C#" in out  # full-width colon; text untranslated -> en
+    assert "**康奈尔大学**，Ithaca NY" in out  # full-width comma; location falls back
+    assert "*博士研究员*" in out
+    assert '::: {.cv-entry dates="2024年8月 - 至今"}' in out
+    assert "- 一条要点" in out
+
+
+def test_untranslated_strings_fall_back_to_english_in_a_chinese_render():
+    out = render(build_zh_doc(), lang=ZH)
+    assert "Email: [x@y.edu](mailto:x@y.edu)  " in out
+    assert "Ithaca NY" in out
+    assert "Python, C#" in out
+
+
+def test_plain_str_fields_still_render_under_any_language():
+    """Hand-built Documents in older tests use bare str, not LStr; both must work."""
+    out = render(build_doc(), lang=ZH)
+    assert "**EnergyAtlas.io**，Ithaca NY" in out  # chrome is per language
+    assert "Lead Developer" in out  # a bare str has no translation to offer

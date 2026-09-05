@@ -126,8 +126,11 @@ items:
     assert lint(root) == []
 
 
-def test_the_real_repository_is_lint_clean():
-    assert lint(Path(__file__).resolve().parent.parent) == []
+def test_the_real_repository_has_no_lint_errors():
+    """Warnings are allowed: with zh declared, every untranslated string is one.
+    Errors are not - they mean the content is wrong rather than unfinished."""
+    findings = lint(Path(__file__).resolve().parent.parent)
+    assert [f for f in findings if f.is_error] == []
 
 
 AWARD = """

@@ -88,15 +88,29 @@ def stage_assets() -> list[Path]:
     return staged
 
 
-def build_one(config: Config, quarto: str, length: str, variant: str) -> Path:
+def render_name(length: str, variant: str, lang: str) -> str:
+    """cv-long-general-en: every output is suffixed with its language, en included.
+
+    The source language is not exempt. Consistency across the set of outputs was
+    chosen over keeping the pre-localization filenames.
+    """
+    return f"cv-{length}-{variant}-{lang}"
+
+
+def build_one(
+    config: Config, quarto: str, length: str, variant: str, lang: str | None = None
+) -> Path:
+    lang = lang or "en"
+    language = config.languages[lang]
     doc = select(config, length, variant)
     BUILD_DIR.mkdir(exist_ok=True)
     OUT_DIR.mkdir(exist_ok=True)
     stage_assets()
-    qmd = BUILD_DIR / f"{doc.name}.qmd"
-    qmd.write_text(render(doc), encoding="utf-8")
+    name = render_name(length, variant, lang)
+    qmd = BUILD_DIR / f"{name}.qmd"
+    qmd.write_text(render(doc, lang=language), encoding="utf-8")
 
-    pdf = OUT_DIR / f"{doc.name}.pdf"
+    pdf = OUT_DIR / f"{name}.pdf"
     # Quarto resolves a bare --output filename relative to its own process
     # cwd, not relative to the input file. Run it with cwd=BUILD_DIR (and
     # pass bare filenames) so the intermediate .typ and the rendered PDF both
@@ -116,9 +130,21 @@ def build_one(config: Config, quarto: str, length: str, variant: str) -> Path:
         produced.replace(pdf)
     if not pdf.exists():
         raise BuildError(
-            f"{length}/{variant}: quarto exited successfully but no PDF was found at {pdf}"
+            f"{length}/{variant}/{lang}: quarto exited successfully but no PDF was found at {pdf}"
         )
     return pdf
+
+
+def languages_for(config: Config, lang: str | None) -> list[str]:
+    """Resolve --lang to the languages to build; all declared when absent."""
+    if lang is None:
+        return list(config.languages)
+    if lang not in config.languages:
+        raise SystemExit(
+            f"no language {lang!r} is declared in variants.yaml\n"
+            f"  declared: {', '.join(config.languages)}"
+        )
+    return [lang]
 
 
 def report_contact_source(config: Config, as_json: bool = False) -> None:
@@ -217,6 +243,7 @@ def main(argv: list[str] | None = None) -> int:
     length_group.add_argument("--long", dest="length", action="store_const", const="long")
     length_group.add_argument("--short", dest="length", action="store_const", const="short")
     parser.add_argument("--variant", help="build only this variant")
+    parser.add_argument("--lang", help="build only this language (default: every declared one)")
     parser.add_argument("--check", action="store_true", help="validate content, render nothing")
     parser.add_argument("--lint", action="store_true", help="check for silent semantic mistakes")
     parser.add_argument("--explain", metavar="LENGTH/VARIANT", help="why each item is in or out")
@@ -274,12 +301,15 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"content is invalid:\n{joined}", file=sys.stderr)
             return 1
         documents = config.all_documents()
+        renders = config.all_renders()
         if args.json:
             print(
                 json.dumps(
                     {
                         "ok": True,
                         "documents": [f"{a}/{b}" for a, b in documents],
+                        "languages": list(config.languages),
+                        "renders": [f"{a}/{b}/{c}" for a, b, c in renders],
                         "contact_source": (
                             LOCAL_PROFILE if config.profile.has_local_override else "placeholder"
                         ),
@@ -288,25 +318,31 @@ def main(argv: list[str] | None = None) -> int:
                 )
             )
         else:
-            print(f"content is valid: {len(documents)} documents declared")
+            print(
+                f"content is valid: {len(documents)} documents declared, "
+                f"{len(renders)} renders across {', '.join(config.languages)}"
+            )
         return 0
 
-    if not (args.all or args.length or args.variant):
-        parser.error("choose --all, --long, --short, --variant or --check")
+    if not (args.all or args.length or args.variant or args.lang):
+        parser.error("choose --all, --long, --short, --variant, --lang or --check")
 
     try:
         documents = documents_for(config, args.length, args.variant)
+        languages = languages_for(config, args.lang)
         quarto = find_quarto()
         for length, variant in documents:
-            print(f"building {length}/{variant}")
-            try:
-                print(f"  wrote {build_one(config, quarto, length, variant)}")
-            except subprocess.CalledProcessError as exc:
-                print(
-                    f"quarto failed on {length}/{variant} with exit code {exc.returncode}",
-                    file=sys.stderr,
-                )
-                return 1
+            for lang in languages:
+                print(f"building {length}/{variant}/{lang}")
+                try:
+                    print(f"  wrote {build_one(config, quarto, length, variant, lang)}")
+                except subprocess.CalledProcessError as exc:
+                    print(
+                        f"quarto failed on {length}/{variant}/{lang} "
+                        f"with exit code {exc.returncode}",
+                        file=sys.stderr,
+                    )
+                    return 1
     except SelectionError as exc:
         print(f"cannot build: {exc}", file=sys.stderr)
         return 1

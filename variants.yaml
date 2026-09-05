@@ -3,6 +3,15 @@
 #
 # `sections` is the default order for that length; a variant may override it.
 # Section names are the filename stems in content/.
+#
+# `languages` is a third axis: every (length, variant) renders once per language
+# to cv-<length>-<variant>-<lang>.pdf. `en` is the source and is required. Any
+# string without a translation falls back to English, and `--lint` lists every
+# such string as a warning - unfinished, not wrong.
+
+languages:
+  en: {typst: en, font: Garamond}
+  zh: {typst: zh, font: [Garamond, Noto Serif SC]}
 
 long:
   sections: [research-interests, education, experience, publications, presentations, awards, skills]

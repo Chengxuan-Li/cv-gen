@@ -249,3 +249,75 @@ def test_lint_warnings_do_not_fail_the_run(tmp_path, capsys, monkeypatch):
     assert payload["ok"] is True
     assert payload["warnings"] == 1 and payload["errors"] == 0
     assert payload["findings"][0]["severity"] == "warning"
+
+
+# --- Localization: the third axis -------------------------------------------
+
+VARIANTS_ZH = """
+languages:
+  en: {typst: en, font: Garamond}
+  zh: {typst: zh, font: [Garamond, Noto Serif SC]}
+short:
+  sections: [skills]
+  variants:
+    general: {}
+"""
+
+
+def test_render_name_suffixes_every_language_including_english():
+    assert build.render_name("long", "general", "en") == "cv-long-general-en"
+    assert build.render_name("short", "gev-pos-1", "zh") == "cv-short-gev-pos-1-zh"
+
+
+def test_languages_for_defaults_to_all_declared_and_rejects_unknown(tmp_path, monkeypatch):
+    root = write_min_repo(tmp_path)
+    (root / "variants.yaml").write_text(VARIANTS_ZH, encoding="utf-8")
+    monkeypatch.chdir(root)
+    from cvgen.schema import load
+
+    config = load(root)
+    assert build.languages_for(config, None) == ["en", "zh"]
+    assert build.languages_for(config, "zh") == ["zh"]
+    with pytest.raises(SystemExit) as excinfo:
+        build.languages_for(config, "fr")
+    assert "zh" in str(excinfo.value)
+
+
+def test_check_json_lists_renders_per_language(tmp_path, capsys, monkeypatch):
+    root = write_min_repo(tmp_path)
+    (root / "variants.yaml").write_text(VARIANTS_ZH, encoding="utf-8")
+    monkeypatch.chdir(root)
+    assert build.main(["--check", "--json"]) == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["documents"] == ["short/general"]
+    assert payload["languages"] == ["en", "zh"]
+    assert payload["renders"] == ["short/general/en", "short/general/zh"]
+
+
+def test_check_json_without_languages_declared_is_english_only(tmp_path, capsys, monkeypatch):
+    monkeypatch.chdir(write_min_repo(tmp_path))
+    assert build.main(["--check", "--json"]) == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["languages"] == ["en"]
+    assert payload["renders"] == ["short/general/en"]
+
+
+def test_build_one_names_the_output_by_language(tmp_path, monkeypatch):
+    root = write_min_repo(tmp_path)
+    (root / "variants.yaml").write_text(VARIANTS_ZH, encoding="utf-8")
+    (root / "templates").mkdir()
+    monkeypatch.chdir(root)
+    from cvgen.schema import load
+
+    config = load(root)
+
+    def fake_quarto(cmd, cwd, check):
+        # Pretend quarto wrote the PDF beside the .qmd, as the real one does.
+        (Path(cwd) / cmd[cmd.index("--output") + 1]).write_bytes(b"%PDF")
+
+    monkeypatch.setattr(build.subprocess, "run", fake_quarto)
+    pdf = build.build_one(config, "quarto", "short", "general", "zh")
+    assert pdf.name == "cv-short-general-zh.pdf"
+    qmd = (root / ".build" / "cv-short-general-zh.qmd").read_text(encoding="utf-8")
+    assert "lang: zh" in qmd
+    assert '"Noto Serif SC"' in qmd
