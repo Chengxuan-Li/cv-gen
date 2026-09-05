@@ -321,3 +321,39 @@ def test_build_one_names_the_output_by_language(tmp_path, monkeypatch):
     qmd = (root / ".build" / "cv-short-general-zh.qmd").read_text(encoding="utf-8")
     assert "lang: zh" in qmd
     assert '"Noto Serif SC"' in qmd
+
+
+def test_parse_document_accepts_an_optional_language():
+    assert build.parse_document("long/general") == ("long", "general", "en")
+    assert build.parse_document("long/general/zh") == ("long", "general", "zh")
+    for bad in ("long", "long/general/zh/extra", "long//zh", ""):
+        with pytest.raises(SystemExit):
+            build.parse_document(bad)
+
+
+def test_explain_json_reports_fallbacks_for_a_language(tmp_path, capsys, monkeypatch):
+    root = write_min_repo(tmp_path)
+    (root / "variants.yaml").write_text(VARIANTS_ZH, encoding="utf-8")
+    monkeypatch.chdir(root)
+    assert build.main(["--explain", "short/general/zh", "--json"]) == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["document"] == "short/general"
+    assert payload["lang"] == "zh"
+    assert payload["fallbacks"] == 1  # the one untranslated skills label
+    assert payload["items"][0]["fallback"] is True
+
+
+def test_explain_text_summarises_fallbacks(tmp_path, capsys, monkeypatch):
+    root = write_min_repo(tmp_path)
+    (root / "variants.yaml").write_text(VARIANTS_ZH, encoding="utf-8")
+    monkeypatch.chdir(root)
+    assert build.main(["--explain", "short/general/zh"]) == 0
+    out = capsys.readouterr().out
+    assert "short/general/zh:" in out
+    assert "1 fall back to en" in out
+    assert "[falls back to en]" in out
+
+
+def test_explain_rejects_an_undeclared_language(tmp_path, monkeypatch):
+    monkeypatch.chdir(write_min_repo(tmp_path))
+    assert build.main(["--explain", "short/general/zh"]) == 1

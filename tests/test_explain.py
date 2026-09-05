@@ -105,3 +105,84 @@ def test_render_marks_exclusions_visibly():
     text = render(explain(build_config(), "short", "general"))
     assert "EXCLUDE" in text
     assert "gate=tier" in text
+
+
+# --- Localization -----------------------------------------------------------
+
+from cvgen.localize import LStr, language_spec  # noqa: E402
+
+
+def build_zh_config() -> Config:
+    """One entry fully translated, one only partly, one not at all."""
+    experience = Section(
+        "experience",
+        LStr("Experience", {"zh": "经历"}),
+        "entries",
+        (
+            Entry(
+                Marker(),
+                LStr("Cornell", {"zh": "康奈尔"}),
+                LStr("Ithaca NY", {"zh": "伊萨卡"}),
+                LStr("Aug 2024", {"zh": "2024年8月"}),
+                LStr("PhD Researcher", {"zh": "博士研究员"}),
+                (
+                    Item(Marker(), LStr("Translated bullet", {"zh": "已翻译"})),
+                    Item(Marker(), LStr("Untranslated bullet")),
+                ),
+            ),
+            Entry(
+                Marker(),
+                LStr("Partly", {"zh": "部分"}),
+                LStr("London"),  # no zh: the entry falls back
+                LStr("2023", {"zh": "2023年"}),
+                LStr("Consultant", {"zh": "顾问"}),
+                (),
+            ),
+            Entry(Marker(LONG, (GENERAL,)), LStr("Long only"), LStr("X"), LStr("Y"), LStr("Z"), ()),
+        ),
+    )
+    profile = Profile(LStr("X"), (LStr("Email: x"),), (Item(Marker(), LStr("T")),))
+    return Config(
+        profile,
+        {"experience": experience},
+        {"long": {"general": ("experience",)}, "short": {"general": ("experience",)}},
+        {
+            "en": language_spec("en", {"typst": "en", "font": "Garamond"}),
+            "zh": language_spec("zh", {"typst": "zh", "font": ["Garamond", "Noto Serif SC"]}),
+        },
+    )
+
+
+def test_english_never_falls_back():
+    assert not any(d.fallback for d in explain(build_zh_config(), "long", "general"))
+    assert not any(d.fallback for d in explain(build_zh_config(), "long", "general", "en"))
+
+
+def test_chinese_marks_exactly_the_items_that_fall_back():
+    decisions = by_path(explain(build_zh_config(), "long", "general", "zh"))
+    assert decisions["experience/entries[0]"].fallback is False  # fully translated
+    assert decisions["experience/entries[0].bullets[0]"].fallback is False
+    assert decisions["experience/entries[0].bullets[1]"].fallback is True
+    assert decisions["experience/entries[1]"].fallback is True  # location untranslated
+    assert decisions["experience/entries[2]"].fallback is True  # nothing translated
+
+
+def test_language_does_not_change_inclusion():
+    """Translation decides how an item reads, never whether it is in."""
+    en = [(d.path, d.included) for d in explain(build_zh_config(), "short", "general", "en")]
+    zh = [(d.path, d.included) for d in explain(build_zh_config(), "short", "general", "zh")]
+    assert en == zh
+    excluded = by_path(explain(build_zh_config(), "short", "general", "zh"))["experience/entries[2]"]
+    assert excluded.included is False and excluded.fallback is False
+
+
+def test_undeclared_language_raises():
+    with pytest.raises(SelectionError) as excinfo:
+        explain(build_zh_config(), "long", "general", "fr")
+    assert "zh" in str(excinfo.value)
+
+
+def test_render_flags_fallbacks():
+    text = render(explain(build_zh_config(), "long", "general", "zh"))
+    assert text.count("[falls back to en]") == 3
+    assert "experience/entries[0].bullets[1]" in text

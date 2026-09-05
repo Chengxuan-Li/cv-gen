@@ -314,6 +314,8 @@ breaking. Agents branch on the code.
 | Malformed marker (unclosed `[`) | `malformed_marker` | file, item index, the offending text |
 | Empty or non-mapping content file | `empty_file`, `not_a_mapping` | the file |
 | No `tagline` survives both gates | `no_surviving_tagline` | `profile.yaml` and the document being built |
+| A language map keys a language not in `languages:` | `undeclared_language` | the code and the declared set |
+| A language map, or `languages:`, lacks `en` | `missing_source_language` | the file and path |
 | `quarto` not on PATH | — | `winget install Posit.Quarto` |
 
 Two further checks are warnings rather than load errors, reported by
@@ -324,13 +326,57 @@ the tracked file — but because `contact:` is replaced wholesale by the overrid
 such a line must be repeated in both files or it disappears once the override
 exists.
 
+Every problem also carries a **severity**. `error` means the content is wrong;
+`warning` means it is unfinished. `--lint` exits non-zero only for errors, which
+is what lets a half-translated CV keep building while every untranslated string
+is still listed. Load-time problems are always errors. Lint's warning is
+`untranslated_string`; its localization error is `marker_in_translation`.
+
+## Localization
+
+A language is a **third axis** of a document, `(length, variant, lang)`, not a
+variant: `general` is an inherited base pool, so a `zh` variant would receive
+every English item as well as its own and render both. Variant answers *which
+content*; language answers *which rendering of the same content*.
+
+Every translatable value is either a plain string or a language-keyed map. A
+plain string is the English source and serves every language; a map supplies
+translations and falls back to its `en` entry, which is required. Migration was
+zero: every existing string already was the English source.
+
+```yaml
+org: {en: Cornell University, zh: 康奈尔大学}
+bullets:
+  - Develop load profile inference methods.         # plain: every language
+  - en: + Research inverse-modeling workflows.      # map: marker on en only
+    zh: 研究反演建模工作流。
+```
+
+- **The marker is parsed from `en` only.** Translation decides how an item reads,
+  never whether it is included, so `select.py` is untouched by localization and
+  a marker in a translation is a lint error rather than a second thing to keep in
+  sync.
+- **A map is a localized string only if every key is a two-letter language
+  code** (`^[a-z]{2}(-[A-Z]{2})?$`). No field name matches — including the
+  three-letter `org` — which is what makes a map standing in for a `rows` or
+  `prose` item unambiguous against `{text:, date:}`.
+- **Languages are declared in `variants.yaml`** with the Typst `lang` code (which
+  drives CJK line-breaking) and a font stack. Chrome — the comma between org and
+  location, the colon after a label, the graduation caption — is per language,
+  full-width for Chinese, and lives beside the language as data.
+- **Outputs are all suffixed**, `cv-long-general-en.pdf` and `-zh.pdf` alike.
+- **Font is set by a raw `#set text(font: (...))` at the top of the body**, not
+  by `mainfont`: Quarto rejects a YAML list there, and with `mainfont` omitted
+  its own `set text(font:)` is a no-op, so the body-level set is not overridden.
+
 ## Inspection surfaces
 
 Beyond `--check`, three commands make the model inspectable without rendering:
 
 | Command | Answers |
 |---|---|
-| `--explain LENGTH/VARIANT` | for each item, included or excluded, and which gate decided it |
+| `--explain LENGTH/VARIANT[/LANG]` | for each item, included or excluded, and which gate decided it; with a language, which included items fall back to English |
+| `--lang CODE` | build one language rather than every declared one |
 | `--lint` | the two silent mistakes above, which no schema can catch |
 | `--schema` | regenerates `schema/*.json` from `cvgen/spec.py` |
 
@@ -383,6 +429,11 @@ into a parser. Exit codes: `0` success, `1` content or build failure, `2` usage.
 | Lua filter rather than emitting raw Typst | Raw Typst blocks would bypass Pandoc, breaking `**bold**` and links inside content. |
 | Template assets staged into `.build/` | Typst sandboxes file access to its project root, which is `.build/`. A `../templates/...` path is rejected as escaping the sandbox, so `stage_assets()` copies them in and `cv.typ` uses bare filenames. |
 | Rendered PDFs gitignored | Repo stays source-only and reproducible. Trivially reversible if linkable PDFs are wanted later. |
+| Language as a third axis, not a variant | `general` is inherited by every variant, so a language variant would receive all English content too. Variant is *which content*; language is *which rendering*. |
+| Inline `{en, zh}` maps over an id-keyed sidecar | Zero migration and no second file to drift. A sidecar needed an id on every item. |
+| Marker parsed from `en` only | Inclusion and translation are different axes; `select.py` stays untouched and translations never carry markers. |
+| Untranslated strings are lint warnings | Unfinished is not wrong. Declaring `zh` makes every plain string untranslated; a fatal lint would exit 1 for months. |
+| All outputs language-suffixed, `en` included | Consistency across the output set over preserving pre-localization filenames. |
 | `.yaml`, not `.yml` | The YAML spec recommends it. Discovery globs `*.yaml` only, and `legacy_yml_extension` reports strays so the choice cannot fail silently. |
 | Content model declared in `spec.py` | The validator and the published JSON Schema derive from one table, so they cannot drift. Adding a field is a one-line edit. |
 | Declarative table over Pydantic | Pydantic would replace only the structural half while rewriting code that is already correct and well-tested, and cannot express the marker grammar or the two gates either. |

@@ -158,11 +158,28 @@ marker that silently renders a literal `+`.
 
 ---
 
-## 7. Localization (Simplified Chinese) — DESIGN AGREED 2026-09-04, not yet built
+## 7. Localization (Simplified Chinese) — RESOLVED 2026-09-04
 
-Agreed with the owner after two rounds of proposal. This is the contract an
-implementer works from; the reasoning is kept because several choices look
-arbitrary without it.
+Built in full, in the four steps listed at the end of this item, each its own
+commit. What remains is **content work**: `variants.yaml` declares `zh`, every
+string still renders in English, and `python build.py --lint` lists each one as
+an `untranslated_string` warning — that list is the translator's worklist, and
+`--explain long/general/zh` shows which items will fall back. Do not "fix" the
+warnings by removing `zh` from `variants.yaml`.
+
+Two things learned while building that the design below did not anticipate:
+
+- Quarto rejects a YAML list for `mainfont`, so a single value cannot carry a
+  CJK fallback. With `mainfont` omitted, Quarto's own `set text(font:)` is a
+  no-op, and the emitter writes the language's font stack as a raw
+  `#set text(font: (...))` at the top of the body instead. Verified against the
+  real output: the Chinese render resolves Noto Serif SC.
+- `undeclared_language` is a load-time **error** rather than the lint error the
+  design named, because the loader must decide how to read a mapping and cannot
+  do so for an unknown key. The other three codes are as designed.
+
+The agreed design follows, kept because several choices look arbitrary without
+the reasoning.
 
 ### A language is a third axis, not a variant
 

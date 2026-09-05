@@ -52,7 +52,9 @@ Neither reaches into the other. When a change comes in, route it:
 
 | Change | Belongs in |
 |---|---|
-| Papersize, margins, base font family/size, page geometry | `cvgen/emit.py` (`FRONT_MATTER`) |
+| Papersize, margins, base font size, page geometry | `cvgen/emit.py` (`FRONT_MATTER`) |
+| Font stack, Typst language code, per-language punctuation | `variants.yaml` `languages:` — data, emitted by `emit.py` |
+| A new output language | `variants.yaml` `languages:`; then translate by turning strings into `{en:, zh:}` maps |
 | Everything else visual: spacing, rules, heading styles, list markers | `templates/cv.typ` |
 | Which items appear in which document | `cvgen/select.py` |
 | New marker syntax | `cvgen/marker.py` |
@@ -79,6 +81,7 @@ Four commands make the content model inspectable without rendering anything:
 python build.py --check --json           # structured problems: file, line, path, code, hint
 python build.py --lint --json            # silent mistakes a schema cannot catch
 python build.py --explain long/general --json   # why each item is in or out
+python build.py --explain long/general/zh       # ...and which fall back to en
 python build.py --schema                 # regenerate schema/*.json from cvgen/spec.py
 ```
 
@@ -93,6 +96,15 @@ python build.py --schema                 # regenerate schema/*.json from cvgen/s
 - **`cvgen/spec.py` is the single source for the content model.** `schema/*.json`
   is generated from it and a test fails if a committed copy drifts. Never
   hand-edit `schema/*.json`; run `python build.py --schema`.
+- **Language is a third axis, never a variant.** `general` is an inherited base
+  pool, so a `zh` variant would receive every English item as well as its own.
+  Translate by turning a string into `{en: ..., zh: ...}`; the `+`/`[…]` marker
+  stays on the `en` text and is never repeated in a translation (that is a lint
+  error). Untranslated strings are lint *warnings* and do not fail the build.
+- **Lint severities mean what they say.** `error` = the content is wrong;
+  `warning` = it is unfinished. `--lint` exits non-zero only for errors. Do not
+  "fix" a run of `untranslated_string` warnings by deleting a language from
+  `variants.yaml` — that is the translator's worklist.
 - **New content files must be `.yaml`, never `.yml`.** Discovery globs `*.yaml`
   only, so a `.yml` file does not load. The `legacy_yml_extension` diagnostic
   catches it rather than letting the section silently vanish — but do not rely on
@@ -103,10 +115,14 @@ python build.py --schema                 # regenerate schema/*.json from cvgen/s
 The page-geometry split looks arbitrary but isn't: Quarto's own template emits
 its `#set page(...)` call *after* the header include, so a `#set page` written
 in `cv.typ` would be silently overridden. Those specific values (papersize,
-margin, `mainfont`, `fontsize`) have to live in the front matter `emit.py`
-writes, where Quarto itself reads them; `cv.typ` even notes this. This is not
-Python making a styling *decision* — the values are still fixed data Quarto
-owns, just expressed as YAML front matter instead of Typst.
+margin, `fontsize`) have to live in the front matter `emit.py` writes, where
+Quarto itself reads them; `cv.typ` even notes this. The font is the one
+exception to the exception: Quarto rejects a YAML list for `mainfont`, so a
+single value could not carry a CJK fallback. With `mainfont` omitted, Quarto's
+own `set text(font:)` is a no-op, and `emit.py` writes the language's font
+stack as a raw `#set text(font: (...))` at the top of the body, where nothing
+overrides it. This is not Python making a styling *decision* — the values are
+still fixed data, declared per language in `variants.yaml`.
 
 If a fix seems to need Python changes for a purely visual outcome beyond that
 front matter, that is a signal the boundary is being crossed. Reconsider.

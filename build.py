@@ -168,12 +168,17 @@ def report_contact_source(config: Config, as_json: bool = False) -> None:
         )
 
 
-def parse_document(spec: str) -> tuple[str, str]:
-    """'long/general' -> ('long', 'general')"""
-    length, _, variant = spec.partition("/")
-    if not variant:
-        raise SystemExit(f"--explain takes LENGTH/VARIANT, e.g. long/general (got {spec!r})")
-    return length, variant
+def parse_document(spec: str) -> tuple[str, str, str]:
+    """'long/general' -> ('long', 'general', 'en'); 'long/general/zh' names a language."""
+    parts = spec.split("/")
+    if len(parts) not in (2, 3) or not all(parts):
+        raise SystemExit(
+            f"--explain takes LENGTH/VARIANT or LENGTH/VARIANT/LANG, "
+            f"e.g. long/general or long/general/zh (got {spec!r})"
+        )
+    length, variant = parts[0], parts[1]
+    lang = parts[2] if len(parts) == 3 else "en"
+    return length, variant, lang
 
 
 def run_lint(root: Path, as_json: bool) -> int:
@@ -213,17 +218,20 @@ def run_lint(root: Path, as_json: bool) -> int:
 
 
 def run_explain(config: Config, spec: str, as_json: bool) -> int:
-    length, variant = parse_document(spec)
+    length, variant, lang = parse_document(spec)
     try:
-        decisions = explain(config, length, variant)
+        decisions = explain(config, length, variant, lang)
     except SelectionError as exc:
         print(str(exc), file=sys.stderr)
         return 1
+    fallbacks = sum(1 for d in decisions if d.fallback)
     if as_json:
         print(
             json.dumps(
                 {
                     "document": f"{length}/{variant}",
+                    "lang": lang,
+                    "fallbacks": fallbacks,
                     "items": [d.as_dict() for d in decisions],
                 },
                 indent=2,
@@ -231,7 +239,10 @@ def run_explain(config: Config, spec: str, as_json: bool) -> int:
         )
     else:
         included = sum(1 for d in decisions if d.included)
-        print(f"{length}/{variant}: {included} of {len(decisions)} items included")
+        summary = f"{length}/{variant}/{lang}: {included} of {len(decisions)} items included"
+        if lang != "en":
+            summary += f", {fallbacks} fall back to en"
+        print(summary)
         print(render_explanation(decisions))
     return 0
 
@@ -246,7 +257,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--lang", help="build only this language (default: every declared one)")
     parser.add_argument("--check", action="store_true", help="validate content, render nothing")
     parser.add_argument("--lint", action="store_true", help="check for silent semantic mistakes")
-    parser.add_argument("--explain", metavar="LENGTH/VARIANT", help="why each item is in or out")
+    parser.add_argument(
+        "--explain",
+        metavar="LENGTH/VARIANT[/LANG]",
+        help="why each item is in or out; with /LANG, also which fall back to en",
+    )
     parser.add_argument("--schema", action="store_true", help="regenerate schema/*.json")
     parser.add_argument("--json", action="store_true", help="machine-readable output")
     args = parser.parse_args(argv)

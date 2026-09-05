@@ -59,11 +59,13 @@ contact: content/profile.local.yaml
 ```bash
 python build.py --all                       # every declared document
 python build.py --long                      # every long variant
-python build.py --long --variant general    # one document
+python build.py --long --variant general    # one document, every language
+python build.py --lang zh                   # every document, Chinese only
 python build.py --check                     # validate content, render nothing
 ```
 
-PDFs land in `out/cv-<length>-<variant>.pdf`. Both `out/` and the generated
+PDFs land in `out/cv-<length>-<variant>-<lang>.pdf` — one per declared language,
+English included and suffixed like the rest. Both `out/` and the generated
 `.build/` intermediates are gitignored — the repo tracks source only.
 
 ## Inspecting content
@@ -72,6 +74,7 @@ PDFs land in `out/cv-<length>-<variant>.pdf`. Both `out/` and the generated
 python build.py --check              # validate; reports every problem at once
 python build.py --lint               # silent mistakes a schema cannot catch
 python build.py --explain long/general   # why each item is in or out
+python build.py --explain long/general/zh   # ...and which fall back to English
 python build.py --schema             # regenerate schema/*.json from cvgen/spec.py
 ```
 
@@ -203,6 +206,51 @@ items:
     date: May 2026
 ```
 
+## Languages
+
+A language is a **third axis**, not a variant. Variant answers *which content*;
+language answers *which rendering of the same content*. Every `(length,
+variant)` renders once per language declared in `variants.yaml`:
+
+```yaml
+languages:
+  en: {typst: en, font: Garamond}
+  zh: {typst: zh, font: [Garamond, Noto Serif SC]}
+```
+
+`en` is the source and is required. `typst` is the code Typst needs for
+line-breaking — `zh`, because Chinese has no spaces to wrap at. `font` may be a
+stack; list the Latin face first so Latin text keeps it.
+
+Any translatable value is **either a plain string or a language-keyed map**:
+
+```yaml
+bullets:
+  - Develop load profile inference methods.          # plain: every language
+  - en: + Research inverse-modeling workflows.       # map: per language
+    zh: 研究反演建模工作流。
+```
+
+A plain string serves every language. A map falls back to its `en` entry for
+any language it lacks, so a half-translated CV still builds. Nothing existing had
+to change: every plain string already *is* the English source.
+
+Three rules that follow from that design:
+
+- **The marker is read from `en` only.** Translation decides how an item reads,
+  never whether it is in. A `+ ` or `[…]` at the start of a `zh` value is a lint
+  *error* — a translator who repeated it and got it wrong would create a silent
+  divergence.
+- **A map standing in for a whole item** (in `rows` or `prose`) is recognised
+  because every key is a two-letter language code; `{text:, date:}` is not.
+- **Untranslated strings are lint *warnings*, not errors** — unfinished, not
+  wrong. `--lint` still exits 0 while the list is worked down;
+  `--explain long/general/zh` shows which items will fall back.
+
+Punctuation the emitter writes around content — the comma between org and
+location, the colon after a skills label — comes from the language too, so
+Chinese gets `，` and `：`.
+
 ## Adding a variant
 
 Declare it in `variants.yaml` under whichever lengths should build it:
@@ -242,6 +290,7 @@ cvgen/
   lint.py        semantic mistakes no schema can catch
   diagnostics.py Problem, stable codes, YAML line anchoring
   jsonschema.py  emits schema/*.json from spec.py
+  localize.py    LStr, language declarations, per-language chrome
 variants.yaml    which documents exist, and their section order
 content/         profile.yaml + one file per section
                  profile.local.yaml — real contact details, gitignored
