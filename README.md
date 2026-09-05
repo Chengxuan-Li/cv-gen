@@ -324,5 +324,6 @@ python -m pytest
 |---|---|
 | [AGENTS.md](AGENTS.md) | Operating rules and invariants for AI agents working here |
 | [docs/open-questions.md](docs/open-questions.md) | Decisions deliberately left open — read before proposing improvements |
+| [docs/translating.md](docs/translating.md) | How to add a language and translate content — the content agent's guide |
 | [docs/superpowers/specs/…-design.md](docs/superpowers/specs/2026-09-03-cv-gen-design.md) | The design and its rationale |
 | [docs/superpowers/plans/…-implementation.md](docs/superpowers/plans/2026-09-03-cv-gen-implementation.md) | How it was built, task by task |

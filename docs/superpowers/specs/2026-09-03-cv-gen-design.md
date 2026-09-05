@@ -56,7 +56,8 @@ once. `select.py` never formats; `emit.py` never filters.
 
 A **document** is a `(length, variant)` pair declared in `variants.yaml`.
 `length` is `long` or `short`. Every document renders to
-`out/cv-<length>-<variant>.pdf`.
+`out/cv-<length>-<variant>-<lang>.pdf`, once per declared language — see
+Localization below.
 
 ### Marker grammar
 

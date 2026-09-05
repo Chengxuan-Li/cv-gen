@@ -101,6 +101,8 @@ python build.py --schema                 # regenerate schema/*.json from cvgen/s
   Translate by turning a string into `{en: ..., zh: ...}`; the `+`/`[…]` marker
   stays on the `en` text and is never repeated in a translation (that is a lint
   error). Untranslated strings are lint *warnings* and do not fail the build.
+  The full procedure, including the `profile.local.yaml` trap, is in
+  [docs/translating.md](docs/translating.md).
 - **Lint severities mean what they say.** `error` = the content is wrong;
   `warning` = it is unfinished. `--lint` exits non-zero only for errors. Do not
   "fix" a run of `untranslated_string` warnings by deleting a language from

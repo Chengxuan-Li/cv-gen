@@ -123,21 +123,17 @@ The one rule that still binds: real contact details belong in the untracked
 
 ---
 
-## 5. The short CV is two pages, pending content trimming
+## 5. The short CV was two pages — RESOLVED by content tiering
 
-**State:** `cv-short-general.pdf` runs to two pages as of 2026-09-04, and
-`tests/test_render.py::test_short_variant_is_one_page` is marked `xfail` because
-of it.
+The spacing values in `templates/cv.typ` were set to clean ratios of a single
+`BASE` on 2026-09-04, which pushed `cv-short-general-en.pdf` to two pages. The
+owner chose to absorb that by trimming content rather than compressing the
+layout, and the content agent's tiering (item 1) brought it back to one page the
+same day. The `xfail` marker on `test_short_variant_is_one_page` is gone; the
+test is live again.
 
-**Why it is open:** the three spacing values in `templates/cv.typ` were
-deliberately set to clean ratios of a single `BASE` rather than tuned decimals
-that happened to fit. The owner chose to absorb the overflow by trimming content
-instead of compressing the layout.
-
-**Do not "fix" this by shrinking the spacing.** That reverses a decision made
-knowingly. The overflow belongs to the content side (see item 6), and the test is
-`xfail(strict=False)` rather than deleted precisely so it reports XPASS the
-moment the short CV fits again — at which point remove the marker.
+The principle stands: **if the short CV overflows again, that is a content
+decision, not a spacing one.** Do not shrink `BASE` to fit.
 
 ---
 

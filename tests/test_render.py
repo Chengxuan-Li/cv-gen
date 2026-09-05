@@ -62,17 +62,9 @@ def page_count(pdf: Path) -> int:
         return len(list(Path(tmp).glob("page*.png")))
 
 
-@pytest.mark.xfail(
-    strict=False,
-    reason=(
-        "The short CV is two pages as of 2026-09-04. The spacing values were "
-        "deliberately set to clean ratios of BASE rather than tuned to fit, and "
-        "the owner is resolving the overflow by trimming content instead. This "
-        "stays as xfail rather than being deleted so it reports XPASS the moment "
-        "it fits again - remove the marker then. See docs/open-questions.md."
-    ),
-)
 def test_short_variant_is_one_page(built):
+    """The English short CV must fit one page. Overflow is a content decision,
+    never a spacing one - see docs/open-questions.md item 5."""
     short = next(p for p in built if p.name == "cv-short-general-en.pdf")
     assert page_count(short) == 1
 
