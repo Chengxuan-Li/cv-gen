@@ -7,16 +7,29 @@ source line, a path into the document, and a stable `code` (see
 
 What may appear in a content file is declared in `spec.py`, not encoded in the
 branches here. To add a field or a block type, edit that table.
+
+Every translatable value is loaded as an `LStr` (see `localize.py`): a plain
+string is the English source serving every language, and a language-keyed map
+supplies translations. Consumers see the English text through the ordinary str
+interface; only the emitter asks an LStr for another language.
 """
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 import yaml
 
 from .diagnostics import Problem, Source, line_index
+from .localize import (
+    SOURCE_LANG,
+    LanguageSpec,
+    LStr,
+    default_languages,
+    is_lang_map,
+    language_spec,
+)
 from .marker import Marked, Marker, MarkerError, parse_item, parse_mark
 from .spec import (
     BLOCK_TYPES,
@@ -104,9 +117,14 @@ class Config:
     profile: Profile
     sections: dict[str, Section]
     documents: dict[str, dict[str, tuple[str, ...]]]
+    languages: dict[str, LanguageSpec] = field(default_factory=default_languages)
 
     def all_documents(self) -> list[tuple[str, str]]:
         return [(length, v) for length, variants in self.documents.items() for v in variants]
+
+    def all_renders(self) -> list[tuple[str, str, str]]:
+        """Every (length, variant, lang) that builds to a PDF."""
+        return [(l, v, lang) for l, v in self.all_documents() for lang in self.languages]
 
     def declared_variants(self) -> set[str]:
         return {v for variants in self.documents.values() for v in variants}
@@ -120,6 +138,32 @@ class MarkerSite:
     source: Source
     path: tuple
     where: str
+
+
+@dataclass(frozen=True)
+class TextSite:
+    """Where a translatable string was written, so lint can report on it."""
+
+    text: LStr
+    source: Source
+    path: tuple
+    where: str
+
+
+@dataclass
+class _Ctx:
+    """Everything the loader accumulates while walking the files."""
+
+    languages: dict[str, LanguageSpec]
+    problems: list[Problem] = field(default_factory=list)
+    sites: list[MarkerSite] = field(default_factory=list)
+    texts: list[TextSite] = field(default_factory=list)
+
+
+@dataclass(frozen=True)
+class Loaded:
+    config: Config
+    texts: tuple[TextSite, ...]
 
 
 def _read(path: Path, problems: list[Problem]) -> Source:
@@ -147,43 +191,81 @@ def _read(path: Path, problems: list[Problem]) -> Source:
     return Source(path, data, line_index(text))
 
 
-def _marked(
-    raw: object,
-    source: Source,
-    path: tuple,
-    where: str,
-    problems: list[Problem],
-    sites: list[MarkerSite],
-) -> Marked:
-    """Parse one marked string, recording its marker site."""
+def _text(raw: object, source: Source, path: tuple, where: str, ctx: _Ctx) -> LStr:
+    """Load one translatable value: a plain string or a language-keyed map."""
+    if not is_lang_map(raw):
+        result = LStr("" if raw is None else str(raw))
+        ctx.texts.append(TextSite(result, source, path, where))
+        return result
+
+    assert isinstance(raw, dict)
+    for lang in raw:
+        if lang not in ctx.languages:
+            ctx.problems.append(
+                source.problem(
+                    "undeclared_language",
+                    f"{where}: language {lang!r} is not declared in variants.yaml "
+                    f"(declared: {', '.join(sorted(ctx.languages))})",
+                    path + (lang,),
+                    field=lang,
+                    hint="add it under `languages:` in variants.yaml, or fix the spelling",
+                )
+            )
+    if SOURCE_LANG not in raw:
+        ctx.problems.append(
+            source.problem(
+                "missing_source_language",
+                f"{where}: a translated value needs an {SOURCE_LANG!r} entry - "
+                f"it is the source every other language falls back to",
+                path,
+                field=SOURCE_LANG,
+            )
+        )
+    src = str(raw.get(SOURCE_LANG, next(iter(raw.values()))))
+    translations = {
+        lang: str(value)
+        for lang, value in raw.items()
+        if lang != SOURCE_LANG and lang in ctx.languages
+    }
+    result = LStr(src, translations)
+    ctx.texts.append(TextSite(result, source, path, where))
+    return result
+
+
+def _marked(raw: object, source: Source, path: tuple, where: str, ctx: _Ctx) -> Marked:
+    """Parse one marked string, recording its marker site.
+
+    The marker is parsed from the source language only. Translations decide how
+    an item reads, never whether it is included, so they carry no marker; lint
+    reports one that does.
+    """
+    text = _text(raw, source, path, where, ctx)
     try:
-        marked = parse_item(str(raw))
+        marked = parse_item(str(text))
     except MarkerError as exc:
-        problems.append(
+        ctx.problems.append(
             source.problem("malformed_marker", f"{where}: {exc}", path, hint=MARKER_HINT)
         )
-        marked = Marked(Marker(), str(raw))
-    sites.append(MarkerSite(marked.marker, source, path, where))
-    return marked
+        marked = Marked(Marker(), str(text))
+    ctx.sites.append(MarkerSite(marked.marker, source, path, where))
+    return Marked(marked.marker, LStr(marked.text, text.translations))
 
 
 def _item_noun(block: BlockSpec) -> str:
     return "entry" if block.items_key == "entries" else "item"
 
 
-def _load_section(
-    path: Path, problems: list[Problem], sites: list[MarkerSite]
-) -> Section | None:
-    source = _read(path, problems)
+def _load_section(path: Path, ctx: _Ctx) -> Section | None:
+    source = _read(path, ctx.problems)
     if not source.data:
         return None
 
     name = path.stem
-    title = str(source.data.get("title", name.title()))
+    title = _text(source.data.get("title", name.title()), source, ("title",), "title", ctx)
     kind = source.data.get("type")
     block = BLOCKS.get(kind) if isinstance(kind, str) else None
     if block is None:
-        problems.append(
+        ctx.problems.append(
             source.problem(
                 "unknown_block_type",
                 f"unknown type {kind!r} (valid: {', '.join(BLOCK_TYPES)})",
@@ -201,23 +283,25 @@ def _load_section(
         path_at = (block.items_key, index)
         where = f"{noun} {index}"
 
-        if isinstance(raw, str) and block.item_form == FLAT:
+        # A bare string, or a language map standing in for one, is shorthand for
+        # the item's text field. A mapping with any non-language key is the item.
+        if block.item_form == FLAT and (isinstance(raw, str) or is_lang_map(raw)):
             raw = {block.text_field: raw}
         if not isinstance(raw, dict):
-            problems.append(
+            ctx.problems.append(
                 source.problem("item_not_a_mapping", f"{where}: expected a mapping", path_at)
             )
             continue
 
         missing = [f for f in block.required_fields if not raw.get(f)]
         if missing:
-            for field in missing:
-                problems.append(
+            for missing_field in missing:
+                ctx.problems.append(
                     source.problem(
                         "missing_required_field",
-                        f"{where}: missing required field {field!r}",
+                        f"{where}: missing required field {missing_field!r}",
                         path_at,
-                        field=field,
+                        field=missing_field,
                         hint=f"{block.type} requires: {', '.join(block.required_fields)}",
                     )
                 )
@@ -226,41 +310,37 @@ def _load_section(
         values: dict[str, object] = {}
         for spec in block.fields:
             raw_value = raw.get(spec.name)
+            field_path = path_at + (spec.name,)
             if spec.kind == MARKED:
-                marked = _marked(
-                    raw_value, source, path_at + (spec.name,), where, problems, sites
-                )
+                marked = _marked(raw_value, source, field_path, where, ctx)
                 values[spec.name] = marked.text
                 values["__marker__"] = marked.marker
             elif spec.kind == MARK:
                 try:
                     marker = parse_mark(raw_value)
                 except MarkerError as exc:
-                    problems.append(
+                    ctx.problems.append(
                         source.problem(
                             "malformed_marker",
                             f"{where}: {exc}",
-                            path_at + (spec.name,),
+                            field_path,
                             field=spec.name,
                             hint=MARKER_HINT,
                         )
                     )
                     marker = Marker()
-                sites.append(MarkerSite(marker, source, path_at, where))
+                ctx.sites.append(MarkerSite(marker, source, path_at, where))
                 values["__marker__"] = marker
             elif spec.kind == MARKED_LIST:
                 bullets = []
                 for i, bullet in enumerate(raw_value or []):
                     marked = _marked(
-                        bullet,
-                        source,
-                        path_at + (spec.name, i),
-                        f"{where}, bullet {i}",
-                        problems,
-                        sites,
+                        bullet, source, field_path + (i,), f"{where}, bullet {i}", ctx
                     )
                     bullets.append(Item(marked.marker, marked.text))
                 values[spec.name] = tuple(bullets)
+            elif spec.translatable:
+                values[spec.name] = _text(raw_value, source, field_path, where, ctx)
             else:
                 values[spec.name] = str(raw_value) if raw_value is not None else ""
 
@@ -286,9 +366,7 @@ def _build_item(block: BlockSpec, values: dict) -> object:
     return Item(marker, values["text"], values.get("date", ""))
 
 
-def _load_profile(
-    path: Path, problems: list[Problem], sites: list[MarkerSite]
-) -> Profile:
+def _load_profile(path: Path, ctx: _Ctx) -> Profile:
     """Load profile.yaml, letting an untracked profile.local.yaml override it.
 
     The tracked file carries deliberately fake contact details; real ones live in
@@ -296,14 +374,14 @@ def _load_profile(
     top-level key replacement - a `contact:` in the override swaps the whole
     list, since element-wise merging of a list has no unambiguous meaning.
     """
-    source = _read(path, problems)
+    source = _read(path, ctx.problems)
     data = dict(source.data)
     origin = {key: source for key in data}
 
     local_path = local_profile_path(path)
     has_local_override = local_path.exists()
     if has_local_override:
-        local = _read(local_path, problems)
+        local = _read(local_path, ctx.problems)
         data.update(local.data)
         origin.update({key: local for key in local.data})
 
@@ -311,9 +389,9 @@ def _load_profile(
         """The file a key actually came from, so errors point at the right one."""
         return origin.get(key, source)
 
-    name = str(data.get("name", ""))
+    name = _text(data.get("name", ""), where("name"), ("name",), "name", ctx)
     if not name:
-        problems.append(
+        ctx.problems.append(
             where("name").problem(
                 "missing_required_field", "missing required field 'name'", ("name",), field="name"
             )
@@ -322,27 +400,15 @@ def _load_profile(
     raw_tagline = data.get("tagline", "")
     raw_taglines = raw_tagline if isinstance(raw_tagline, list) else [raw_tagline]
     tagline_source = where("tagline")
-    taglines = tuple(
-        Item(
-            m.marker,
-            m.text,
-        )
-        for m in (
-            _marked(
-                t,
-                tagline_source,
-                ("tagline", i) if isinstance(raw_tagline, list) else ("tagline",),
-                f"tagline {i}",
-                problems,
-                sites,
-            )
-            for i, t in enumerate(raw_taglines)
-        )
-    )
+    taglines = []
+    for i, t in enumerate(raw_taglines):
+        path = ("tagline", i) if isinstance(raw_tagline, list) else ("tagline",)
+        m = _marked(t, tagline_source, path, f"tagline {i}", ctx)
+        taglines.append(Item(m.marker, m.text))
 
     raw_contact = data.get("contact") or []
     if not isinstance(raw_contact, list):
-        problems.append(
+        ctx.problems.append(
             where("contact").problem(
                 "invalid_field_type",
                 f"'contact' must be a list of lines, got {type(raw_contact).__name__}",
@@ -352,21 +418,21 @@ def _load_profile(
             )
         )
         raw_contact = []
-    contact = tuple(str(c) for c in raw_contact)
-    anticipated_graduation = str(data.get("anticipated_graduation", ""))
-    return Profile(
-        name,
-        contact,
-        taglines,
-        has_local_override,
-        anticipated_graduation,
+    contact = tuple(
+        _text(c, where("contact"), ("contact", i), f"contact {i}", ctx)
+        for i, c in enumerate(raw_contact)
     )
+    graduation = _text(
+        data.get("anticipated_graduation", ""),
+        where("anticipated_graduation"),
+        ("anticipated_graduation",),
+        "anticipated_graduation",
+        ctx,
+    )
+    return Profile(name, contact, tuple(taglines), has_local_override, graduation)
 
 
-def _load_documents(
-    path: Path, problems: list[Problem]
-) -> dict[str, dict[str, tuple[str, ...]]]:
-    source = _read(path, problems)
+def _load_documents(source: Source, problems: list[Problem]) -> dict[str, dict[str, tuple[str, ...]]]:
     documents: dict[str, dict[str, tuple[str, ...]]] = {}
 
     for length in LENGTHS:
@@ -413,6 +479,52 @@ def _load_documents(
     return documents
 
 
+def _load_languages(source: Source, problems: list[Problem]) -> dict[str, LanguageSpec]:
+    """Read `languages:` from variants.yaml; English alone when absent."""
+    raw = source.data.get("languages")
+    if raw is None:
+        return default_languages()
+    if not isinstance(raw, dict) or not raw:
+        problems.append(
+            source.problem(
+                "invalid_field_type",
+                "languages must be a mapping of code to {typst, font}",
+                ("languages",),
+                field="languages",
+                hint="e.g. languages: {en: {typst: en, font: Garamond}}",
+            )
+        )
+        return default_languages()
+
+    languages: dict[str, LanguageSpec] = {}
+    for code, spec in raw.items():
+        code = str(code)
+        if spec is not None and not isinstance(spec, dict):
+            problems.append(
+                source.problem(
+                    "invalid_field_type",
+                    f"languages.{code} must be a mapping, got {type(spec).__name__}",
+                    ("languages", code),
+                    field=code,
+                )
+            )
+            spec = None
+        languages[code] = language_spec(code, spec)
+
+    if SOURCE_LANG not in languages:
+        problems.append(
+            source.problem(
+                "missing_source_language",
+                f"languages must include {SOURCE_LANG!r}, the source every "
+                f"translation falls back to",
+                ("languages",),
+                field=SOURCE_LANG,
+            )
+        )
+        languages = {**default_languages(), **languages}
+    return languages
+
+
 def _legacy_extensions(root: Path) -> list[Problem]:
     """Report `.yml` files that the loader will not see.
 
@@ -438,27 +550,31 @@ def _legacy_extensions(root: Path) -> list[Problem]:
     ]
 
 
-def load(root: Path) -> Config:
-    """Load every content file, or raise ValidationError listing all problems."""
-    problems: list[Problem] = []
-    sites: list[MarkerSite] = []
+def load_all(root: Path) -> Loaded:
+    """Load every content file, or raise ValidationError listing all problems.
 
-    variants_path = root / "variants.yaml"
-    documents = _load_documents(variants_path, problems)
-    profile = _load_profile(root / "content" / "profile.yaml", problems, sites)
+    Returns the Config together with every translatable string's location, which
+    lint uses to report translation coverage without re-deriving the loader's
+    rules.
+    """
+    problems: list[Problem] = []
+    variants_source = _read(root / "variants.yaml", problems)
+    documents = _load_documents(variants_source, problems)
+    ctx = _Ctx(languages=_load_languages(variants_source, problems), problems=problems)
+
+    profile = _load_profile(root / "content" / "profile.yaml", ctx)
 
     sections: dict[str, Section] = {}
     for path in sorted((root / "content").glob("*.yaml")):
         if path.stem == "profile" or path.name.endswith(LOCAL_SUFFIX):
             continue
-        section = _load_section(path, problems, sites)
+        section = _load_section(path, ctx)
         if section is not None:
             sections[section.name] = section
 
     problems += _legacy_extensions(root)
 
     available = ", ".join(sorted(sections)) or "none"
-    variants_source = Source(variants_path, {}, {})
     for length, variants in documents.items():
         for variant, order in variants.items():
             for name in order:
@@ -474,9 +590,9 @@ def load(root: Path) -> Config:
                         )
                     )
 
-    config = Config(profile, sections, documents)
+    config = Config(profile, sections, documents, ctx.languages)
     declared = config.declared_variants() | {GENERAL}
-    for site in sites:
+    for site in ctx.sites:
         for target in site.marker.only:
             if target not in declared:
                 problems.append(
@@ -492,4 +608,9 @@ def load(root: Path) -> Config:
 
     if problems:
         raise ValidationError(problems)
-    return config
+    return Loaded(config, tuple(ctx.texts))
+
+
+def load(root: Path) -> Config:
+    """Load every content file, or raise ValidationError listing all problems."""
+    return load_all(root).config

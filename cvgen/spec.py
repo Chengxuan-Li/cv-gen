@@ -32,6 +32,10 @@ class FieldSpec:
     required: bool = False
     kind: str = PLAIN
     doc: str = ""
+    # Whether the value may be a language-keyed map as well as a plain string.
+    # MARKED and MARKED_LIST fields always are; this flag covers PLAIN ones such
+    # as `org` or `dates`. `mark` and `type` never are.
+    translatable: bool = False
 
 
 @dataclass(frozen=True)
@@ -64,7 +68,7 @@ BLOCKS: dict[str, BlockSpec] = {
         items_key="items",
         item_form=MAPPING,
         fields=(
-            FieldSpec("label", required=True, doc="The bolded label before the colon."),
+            FieldSpec("label", required=True, translatable=True, doc="The bolded label before the colon."),
             FieldSpec("text", required=True, kind=MARKED, doc="Markdown, may carry a marker."),
         ),
         renders_as="`**Label**: text`, one per line",
@@ -75,10 +79,10 @@ BLOCKS: dict[str, BlockSpec] = {
         items_key="entries",
         item_form=MAPPING,
         fields=(
-            FieldSpec("org", required=True, doc="Organisation, rendered bold."),
-            FieldSpec("location", required=True, doc="Rendered after the org, unbolded."),
-            FieldSpec("dates", required=True, doc="Rendered flush right on the org line."),
-            FieldSpec("role", required=True, doc="Rendered italic on its own line."),
+            FieldSpec("org", required=True, translatable=True, doc="Organisation, rendered bold."),
+            FieldSpec("location", required=True, translatable=True, doc="Rendered after the org, unbolded."),
+            FieldSpec("dates", required=True, translatable=True, doc="Rendered flush right on the org line."),
+            FieldSpec("role", required=True, translatable=True, doc="Rendered italic on its own line."),
             FieldSpec("mark", kind=MARK, doc="Marker for the whole entry, e.g. '+' or '-[a,b]'."),
             FieldSpec("bullets", kind=MARKED_LIST, doc="Markdown bullets, each may carry a marker."),
         ),
@@ -91,7 +95,7 @@ BLOCKS: dict[str, BlockSpec] = {
         item_form=FLAT,
         fields=(
             FieldSpec("text", required=True, kind=MARKED, doc="Markdown, may carry a marker."),
-            FieldSpec("date", doc="Rendered flush right on the same line."),
+            FieldSpec("date", translatable=True, doc="Rendered flush right on the same line."),
         ),
         renders_as="one line, text left - date right",
         used_by="Awards & Grants",

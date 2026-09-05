@@ -12,8 +12,10 @@ from pathlib import Path
 
 import yaml
 
-from .diagnostics import Problem, format_path, line_index
-from .schema import LOCAL_SUFFIX, local_profile_path
+from .diagnostics import WARNING, Problem, format_path, line_index
+from .localize import SOURCE_LANG
+from .marker import DEFAULT, MarkerError, parse_item
+from .schema import LOCAL_SUFFIX, ValidationError, load_all, local_profile_path
 
 # '+Design' is not a marker - the grammar needs a space - so it renders a literal
 # '+' and the item stays in the short CV. Restricted to a following letter so
@@ -133,6 +135,59 @@ def _real_contact(profile: Path) -> list[Problem]:
     return findings
 
 
+def _translations(root: Path) -> list[Problem]:
+    """Translation rules, driven by the loader's own view of what is translatable.
+
+    Reusing load_all() rather than re-walking the YAML means these rules cannot
+    drift from the loader's definition of a translatable string. If the content
+    does not load, structure is the problem and these rules have nothing to say.
+    """
+    try:
+        loaded = load_all(root)
+    except ValidationError:
+        return []
+
+    targets = [code for code in loaded.config.languages if code != SOURCE_LANG]
+    findings: list[Problem] = []
+    for site in loaded.texts:
+        # A marker belongs to the source string only. One in a translation would
+        # be silently ignored, and a translator who thought it mattered would be
+        # misled into keeping it in sync by hand.
+        for lang, value in site.text.translations.items():
+            try:
+                carries_marker = parse_item(value).marker != DEFAULT
+            except MarkerError:
+                carries_marker = True
+            if carries_marker:
+                findings.append(
+                    site.source.problem(
+                        "marker_in_translation",
+                        f"{site.where}: the {lang} translation starts with a marker; "
+                        f"markers are read from the {SOURCE_LANG} text only",
+                        site.path + (lang,),
+                        field=lang,
+                        hint=f"remove the leading marker from the {lang} value",
+                    )
+                )
+
+        # Unfinished, not wrong: the build falls back to English for this string.
+        if not str(site.text):
+            continue
+        for lang in targets:
+            if not site.text.has(lang):
+                findings.append(
+                    site.source.problem(
+                        "untranslated_string",
+                        f"{site.where}: no {lang} translation, renders in {SOURCE_LANG}",
+                        site.path,
+                        field=lang,
+                        hint=f"make the value a map with {SOURCE_LANG}: and {lang}: entries",
+                        severity=WARNING,
+                    )
+                )
+    return findings
+
+
 def lint(root: Path) -> list[Problem]:
     """Every lint finding. An empty list means clean."""
     findings: list[Problem] = []
@@ -142,4 +197,6 @@ def lint(root: Path) -> list[Problem]:
     profile = root / "content" / "profile.yaml"
     if profile.exists():
         findings += _real_contact(profile)
+
+    findings += _translations(root)
     return findings
