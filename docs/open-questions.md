@@ -155,3 +155,136 @@ If you are here for development, item 1 is not yours to resolve. If you are here
 for content, `python build.py --explain LENGTH/VARIANT` shows exactly what your
 markers will do before you render anything, and `--lint` catches the near-miss
 marker that silently renders a literal `+`.
+
+---
+
+## 7. Localization (Simplified Chinese) — DESIGN AGREED 2026-09-04, not yet built
+
+Agreed with the owner after two rounds of proposal. This is the contract an
+implementer works from; the reasoning is kept because several choices look
+arbitrary without it.
+
+### A language is a third axis, not a variant
+
+Making `zh` a variant breaks on the first rule of the marker system: `general` is
+an inherited base pool, so a `zh` variant would receive all the English content
+*plus* whatever was marked `[zh]`, and render both. Variant answers *which
+content*; language answers *which rendering of the same content*. They are
+orthogonal - one plausibly wants `long/general` in Chinese and
+`short/google-pos-1` in Chinese - so documents become `(length, variant, lang)`.
+
+### Storage: optionally-localized strings, inline
+
+Any translatable value is **either a plain string or a language-keyed map**:
+
+```yaml
+bullets:
+  - Develop machine-learning methods for energy-demand inference.   # plain: all languages
+  - en: + Research inverse-modeling workflows for model calibration. # map: per language
+    zh: 研究用于模型校准的反演建模工作流。
+```
+
+Resolution for language L: plain string → used as-is; map → `map[L]`, falling
+back to `map.en`; map with no `en` → error, since `en` is the source.
+
+**Migration is zero.** Every existing string is already valid and already the
+English source. This is why inline was chosen over a sidecar keyed by item id -
+the sidecar needed an `id:` on every item and a translation file that could
+drift; inline needs neither.
+
+Where the map form is allowed: any field value (`org`, `role`, `dates`, `text`,
+`date`, `label`, `title`, `name`, `tagline`, each `contact` line); a `bullets`
+item; a `rows`/`prose` item. Not `mark`, not `type`, not URLs.
+
+**The one ambiguity:** a `rows` item may already be a mapping (`{text:, date:}`),
+so `{en:, zh:}` as an item must be told apart from it. Rule: *a mapping whose
+every key is a declared language is a localized string.* Language codes are
+constrained to `^[a-z]{2}(-[A-Z]{2})?$`, which no field name matches - including
+the three-letter `org`.
+
+The owner's original sketch used a `- ->` token as a visual cue. It is invalid
+YAML (`mapping values are not allowed here`) and unnecessary: a list item that is
+a mapping rather than a string is already unambiguous by type.
+
+### The marker is parsed from `en` only
+
+Markers decide *what is included*; translation decides *how it reads*. So a
+translation never carries a marker: wrap the English string as `en:` and the `+`
+comes along untouched. A `+ ` or `[...]` at the start of a `zh` string is a lint
+**error** (`marker_in_translation`) - a translator repeating the marker and
+getting it wrong would create a silent divergence. The entry-level `mark:` field
+is separate and unaffected. `select.py` therefore changes **not at all**.
+
+### Declaring languages
+
+```yaml
+# variants.yaml
+languages:
+  en: {typst: en, font: Garamond}
+  zh: {typst: zh, font: [Garamond, Noto Serif SC]}
+```
+
+The table decouples the authoring key from Typst's `lang:` code, which must be
+`zh` for correct CJK line-breaking (Chinese has no spaces to wrap at). Owner
+chose `zh` as the key too, matching BCP 47. Noto Serif SC is installed and is the
+natural serif pairing for Garamond; listing Garamond first keeps Latin text in it.
+
+Every declared `(length, variant)` renders in every declared language.
+
+### Output naming: all suffixed (owner's choice)
+
+`cv-long-general-en.pdf`, `cv-long-general-zh.pdf`. The source language is *not*
+exempt - consistency over backwards compatibility. Existing tests asserting
+`cv-long-general.pdf` and the README build examples change accordingly.
+
+### Fallback visibility: lint warning (owner's choice), which needs severities
+
+The build falls back silently, as the owner asked - a half-translated CV must
+still render while work is in progress. Visibility comes from `--lint`, but with
+a consequence: today every lint finding is fatal, and the moment `zh` is declared
+every plain string is "untranslated for zh" - a hundred-plus findings that would
+make `--lint` exit 1 until translation is complete, and useless for everything
+else meanwhile.
+
+So `Problem` gains a `severity` of `error` or `warning`. `--lint` exits 1 only on
+errors; warnings are printed (and carried in `--json`) but non-fatal.
+`untranslated_string` is a warning. `marker_in_translation` and
+`undeclared_language` are errors. This is a small change to `diagnostics.py`
+with a real payoff: it is the first time the repo distinguishes "wrong" from
+"unfinished".
+
+### What changes
+
+| Module | Change |
+|---|---|
+| `spec.py` | `translatable` flag on fields; per-language chrome strings (`, ` → `，`, `: ` → `：`) - data, not styling |
+| `diagnostics.py` | `severity` on `Problem`; new codes `untranslated_string` (warning), `marker_in_translation`, `undeclared_language` |
+| `schema.py` | `LocalizedString`; declared-language validation; the item-mapping disambiguation |
+| `select.py` | **nothing** |
+| `emit.py` | resolve strings for the target language; per-language `mainfont` and `lang:` in the front matter |
+| `cv.typ` | honour `lang:`; optionally a per-language `BASE`, since CJK conventionally wants a touch more leading |
+| `explain.py` | `--explain long/general/zh`, marking which strings fell back |
+| `lint.py` | the three new rules; warnings do not affect exit code |
+| `jsonschema.py` | translatable fields become `oneOf: [string, lang-map]`; the schema allows the code *pattern*, the loader enforces the declared *set* |
+| `build.py` | `--lang zh`; suffixed output naming |
+
+### Deferred, deliberately
+
+- **Chinese-only content.** A map without `en` is an error, so an item that
+  exists only in Chinese cannot be expressed. The escape hatch is a `langs: [zh]`
+  field - a third gate symmetric with `only:`. The fallback rule implies `en` is
+  always present, so this waits until it is actually needed.
+- **Semantic staleness.** Inline maps eliminate orphan drift entirely, but not
+  "English edited, Chinese not re-checked". Nothing mechanical catches that.
+
+### Order of work
+
+1. `severity` on `Problem` and in `--lint` - independent, small, useful on its own.
+2. `LocalizedString` in `schema.py` with `en`-only resolution and the three lint
+   rules - the whole content model becomes language-aware while output is still
+   English only, so every existing test keeps passing.
+3. `languages:` in `variants.yaml`, the third axis in documents, suffixed naming,
+   per-language front matter. This is the step that changes filenames.
+4. `--explain` fallback marking; JSON Schema; docs.
+
+Roughly one to one-and-a-half sessions.
