@@ -151,15 +151,39 @@ def parse_document(spec: str) -> tuple[str, str]:
 
 
 def run_lint(root: Path, as_json: bool) -> int:
+    """Exit non-zero only for errors. Warnings are reported but do not fail.
+
+    The distinction is what lets a half-translated CV keep building: every
+    untranslated string is a warning, and there may be hundreds of them for
+    months, so a fatal lint would be useless for everything else meanwhile.
+    """
     findings = lint(root)
+    errors = [f for f in findings if f.is_error]
+    warnings = [f for f in findings if not f.is_error]
     if as_json:
-        print(json.dumps({"ok": not findings, "findings": [f.as_dict() for f in findings]}, indent=2))
-    elif findings:
-        joined = "\n".join(f"  - {f}\n    hint: {f.hint}" for f in findings)
-        print(f"lint found {len(findings)} problem(s):\n{joined}", file=sys.stderr)
+        print(
+            json.dumps(
+                {
+                    "ok": not errors,
+                    "errors": len(errors),
+                    "warnings": len(warnings),
+                    "findings": [f.as_dict() for f in findings],
+                },
+                indent=2,
+            )
+        )
     else:
-        print("lint clean")
-    return 1 if findings else 0
+        if errors:
+            joined = "\n".join(f"  - {f}\n    hint: {f.hint}" for f in errors)
+            print(f"lint found {len(errors)} error(s):\n{joined}", file=sys.stderr)
+        if warnings:
+            joined = "\n".join(f"  - {f}" for f in warnings)
+            print(f"lint found {len(warnings)} warning(s):\n{joined}", file=sys.stderr)
+        if not findings:
+            print("lint clean")
+        elif not errors:
+            print("lint clean (warnings only)")
+    return 1 if errors else 0
 
 
 def run_explain(config: Config, spec: str, as_json: bool) -> int:

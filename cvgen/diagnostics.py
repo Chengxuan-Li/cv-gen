@@ -40,10 +40,22 @@ CODES = (
     # Selection, raised at build time rather than load time
     "no_surviving_tagline",
     "unknown_document",
-    # Lint, warnings rather than errors
+    # Lint
     "near_miss_marker",
     "real_contact_in_tracked_profile",
+    # Localization
+    "undeclared_language",
+    "missing_source_language",
+    "marker_in_translation",
+    "untranslated_string",
 )
+
+# Severity. An error means the content is wrong; a warning means it is
+# unfinished. --lint exits non-zero only for errors, which is what lets a
+# half-translated CV keep building while every untranslated string is still
+# reported. Load-time problems are always errors.
+ERROR = "error"
+WARNING = "warning"
 
 
 def format_path(parts: tuple[object, ...]) -> str:
@@ -66,12 +78,22 @@ class Problem:
     path: str = ""
     field: str = ""
     hint: str = ""
+    severity: str = ERROR
 
     def __str__(self) -> str:
         return self.message
 
+    @property
+    def is_error(self) -> bool:
+        return self.severity == ERROR
+
     def as_dict(self) -> dict:
-        out = {"file": self.file, "code": self.code, "message": self.message}
+        out = {
+            "file": self.file,
+            "code": self.code,
+            "severity": self.severity,
+            "message": self.message,
+        }
         if self.line is not None:
             out["line"] = self.line
         for key in ("path", "field", "hint"):
@@ -133,6 +155,7 @@ class Source:
         path: tuple = (),
         field: str = "",
         hint: str = "",
+        severity: str = ERROR,
     ) -> Problem:
         """Build a Problem anchored to this file, prefixing the message with it."""
         return Problem(
@@ -143,4 +166,5 @@ class Source:
             path=format_path(path),
             field=field,
             hint=hint,
+            severity=severity,
         )

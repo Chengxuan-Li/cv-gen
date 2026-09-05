@@ -37,7 +37,12 @@ def test_line_index_survives_malformed_yaml():
 
 def test_problem_as_dict_omits_empty_fields():
     bare = Problem(file="a.yaml", code="empty_file", message="a.yaml: empty file")
-    assert bare.as_dict() == {"file": "a.yaml", "code": "empty_file", "message": "a.yaml: empty file"}
+    assert bare.as_dict() == {
+        "file": "a.yaml",
+        "code": "empty_file",
+        "severity": "error",
+        "message": "a.yaml: empty file",
+    }
 
     full = Problem(
         file="a.yaml",
@@ -51,3 +56,14 @@ def test_problem_as_dict_omits_empty_fields():
     assert full.as_dict()["line"] == 4
     assert full.as_dict()["field"] == "org"
     assert str(full) == full.message
+
+
+def test_problems_are_errors_by_default():
+    from cvgen.diagnostics import ERROR, WARNING
+
+    p = Problem(file="a.yaml", code="empty_file", message="m")
+    assert p.severity == ERROR and p.is_error
+    assert p.as_dict()["severity"] == "error"
+    w = Problem(file="a.yaml", code="untranslated_string", message="m", severity=WARNING)
+    assert not w.is_error
+    assert w.as_dict()["severity"] == "warning"

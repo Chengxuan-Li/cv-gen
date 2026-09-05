@@ -232,3 +232,20 @@ def test_stage_assets_copies_template_svgs_into_the_build_dir(tmp_path, monkeypa
     assert (tmp_path / ".build" / "link-icon.svg").read_text(encoding="utf-8") == "<svg/>"
     # Only assets are staged; the templates themselves are reached another way.
     assert not (tmp_path / ".build" / "cv.typ").exists()
+
+
+def test_lint_warnings_do_not_fail_the_run(tmp_path, capsys, monkeypatch):
+    """Errors mean wrong; warnings mean unfinished. Only wrong fails."""
+    from cvgen.diagnostics import WARNING, Problem
+
+    monkeypatch.chdir(write_min_repo(tmp_path))
+    monkeypatch.setattr(
+        build,
+        "lint",
+        lambda root: [Problem(file="x.yaml", code="untranslated_string", message="m", severity=WARNING)],
+    )
+    assert build.main(["--lint", "--json"]) == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["ok"] is True
+    assert payload["warnings"] == 1 and payload["errors"] == 0
+    assert payload["findings"][0]["severity"] == "warning"
