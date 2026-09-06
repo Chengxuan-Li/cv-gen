@@ -1,26 +1,58 @@
 # yaml-language-server: $schema=../schema/cv-section.schema.json
-title: Education
+title:
+  en: Education
+  zh: 教育经历
 type: entries
 entries:
-  - org: Cornell University
-    location: Ithaca, NY
-    dates: Aug 2024 – Present
-    role: PhD, Systems Engineering; Minor in Electrical and Computer Engineering
+  - org:
+      en: Cornell University
+      zh: 康奈尔大学
+    location:
+      en: Ithaca, NY
+      zh: 美国纽约州伊萨卡
+    dates:
+      en: Aug 2024 – Present
+      zh: 2024年8月 – 至今
+    role:
+      en: PhD, Systems Engineering; Minor in Electrical and Computer Engineering
+      zh: 系统工程博士；辅修电气与计算机工程
     bullets:
-      - >-
-        + Selected coursework: Deep Learning, Computer Vision, Signal Processing,
-        Monte Carlo Simulation, Power Systems, Applied Optimization.
-  - org: Architectural Association
-    location: London, UK
-    dates: Jun 2024
-    role: M.Arch
+      - en: >-
+          + Selected coursework: Deep Learning, Computer Vision, Signal Processing,
+          Monte Carlo Simulation, Power Systems, Applied Optimization.
+        zh: >-
+          精选课程：深度学习、计算机视觉、信号处理、蒙特卡洛模拟、
+          电力系统、应用优化。
+  - org:
+      en: Architectural Association
+      zh: 英国建筑联盟学院
+    location:
+      en: London, UK
+      zh: 英国伦敦
+    dates:
+      en: Jun 2024
+      zh: 2024年6月
+    role:
+      en: M.Arch
+      zh: 建筑学硕士（M.Arch）
     bullets:
-      - >-
-        + Selected focus across the M.Arch and BA (Hons): building energy
-        modeling, building physics, renewable energy systems, net-zero
-        operations, and post-occupancy evaluation.
-  - org: Architectural Association
-    location: London, UK
-    dates: Jun 2022
-    role: BA (Hons)
+      - en: >-
+          + Selected focus across the M.Arch and BA (Hons): building energy
+          modeling, building physics, renewable energy systems, net-zero
+          operations, and post-occupancy evaluation.
+        zh: >-
+          建筑学硕士与荣誉学士阶段的重点领域：建筑能耗建模、建筑物理、
+          可再生能源系统、净零运营及使用后评估。
+  - org:
+      en: Architectural Association
+      zh: 英国建筑联盟学院
+    location:
+      en: London, UK
+      zh: 英国伦敦
+    dates:
+      en: Jun 2022
+      zh: 2022年6月
+    role:
+      en: BA (Hons)
+      zh: 文学学士（荣誉）
     #mark: "+"

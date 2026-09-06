@@ -7,16 +7,24 @@
 # gitignored. That file shallow-overrides top-level keys here, so it usually
 # needs nothing but a `contact:` block. The build prints a warning on every run
 # when it is missing.
-name: Chengxuan Li
-anticipated_graduation: May 2028
+name:
+  en: Chengxuan Li
+  zh: 李承轩
+anticipated_graduation:
+  en: May 2028
+  zh: 2028年5月
 contact:
-  - "Email: [you@example.com](mailto:you@example.com)"
-  - "Phone: +1 (555) 000-0000"
+  - en: "Email: [you@example.com](mailto:you@example.com)"
+    zh: "邮箱：[you@example.com](mailto:you@example.com)"
+  - en: "Phone: +1 (555) 000-0000"
+    zh: "电话：+1 (555) 000-0000"
   # A public URL is not sensitive, so it lives here rather than in the override.
   # It must be repeated in profile.local.yaml too: that file replaces the whole
   # `contact` list, so anything only listed here is dropped once it exists.
-  - "Website: [chengxuan-li.github.io](https://chengxuan-li.github.io)"
+  - en: "Website: [chengxuan-li.github.io](https://chengxuan-li.github.io)"
+    zh: "个人网站：[chengxuan-li.github.io](https://chengxuan-li.github.io)"
 # A list: the first tagline passing both gates wins. Put targeted lines above
 # the unmarked fallback.
 tagline:
-  - "PhD Candidate, Systems Engineering (Minor: Electrical and Computer Engineering), Cornell University"
+  - en: "PhD Candidate, Systems Engineering (Minor: Electrical and Computer Engineering), Cornell University"
+    zh: "康奈尔大学系统工程博士候选人（辅修电气与计算机工程）"

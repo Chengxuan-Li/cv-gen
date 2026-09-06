@@ -1,37 +1,83 @@
 # yaml-language-server: $schema=../schema/cv-section.schema.json
-title: Research & Professional Experience
+title:
+  en: Research & Professional Experience
+  zh: 科研与专业经历
 type: entries
 entries:
-  - org: Environmental Systems Lab, Cornell University
-    location: Ithaca, NY
-    dates: Aug 2024 – Present
-    role: "PhD Researcher — Advisors: Prof. Timur Dogan, Prof. Oliver Gao, and Prof. Jacob Mays"
+  - org:
+      en: Environmental Systems Lab, Cornell University
+      zh: 康奈尔大学环境系统实验室
+    location:
+      en: Ithaca, NY
+      zh: 美国纽约州伊萨卡
+    dates:
+      en: Aug 2024 – Present
+      zh: 2024年8月 – 至今
+    role:
+      en: "PhD Researcher — Advisors: Prof. Timur Dogan, Prof. Oliver Gao, and Prof. Jacob Mays"
+      zh: "博士研究生 — 导师：Timur Dogan 教授、Oliver Gao 教授和 Jacob Mays 教授"
     bullets:
-      - Develop ML, optimization, and physics-informed methods for demand inference, load prediction, and model calibration.
-      - + Research inverse/surrogate modeling and system-identification methods for reduced-order and physics-based energy models using measured data.
-      - Build scalable simulation and data-analysis workflows for urban energy, electrification, demand response, and load flexibility.
-  - org: Environmental Systems Lab, in collaboration with Avangrid / NYSEG
-    location: Tompkins County, NY
-    dates: Mar 2025 – Present
-    role: PhD Researcher, Grid Innovations
+      - en: Develop ML, optimization, and physics-informed methods for demand inference, load prediction, and model calibration.
+        zh: 开发基于机器学习、优化和物理信息的方法，用于需求推断、负荷预测与模型校准。
+      - en: + Research inverse/surrogate modeling and system-identification methods for reduced-order and physics-based energy models using measured data.
+        zh: 利用实测数据，研究适用于降阶及物理能源模型的反演建模、代理建模与系统辨识方法。
+      - en: Build scalable simulation and data-analysis workflows for urban energy, electrification, demand response, and load flexibility.
+        zh: 构建可扩展的仿真与数据分析工作流，用于城市能源、电气化、需求响应和负荷灵活性研究。
+  - org:
+      en: Environmental Systems Lab, in collaboration with Avangrid / NYSEG
+      zh: 康奈尔大学环境系统实验室（与 Avangrid / NYSEG 合作）
+    location:
+      en: Tompkins County, NY
+      zh: 美国纽约州汤普金斯县
+    dates:
+      en: Mar 2025 – Present
+      zh: 2025年3月 – 至今
+    role:
+      en: PhD Researcher, Grid Innovations
+      zh: 博士研究生，电网创新方向
     bullets:
-      - Build python-DuckDB-.NET processing pipelines for AMI and SCADA data for **80,000+ smart meters across 87 feeders**
-      - Train sequential clustering and load-duration prediction models on **3.8M load profiles**, **reducing NRMSE by 50.5%**.
-      - + Develop physics-based models to forecast transformer- and feeder-level load profiles, peak demand, and load-duration behavior.
-      - Quantify demand response and distribution-grid flexibility under heat-pump/electrification growth and DER integration.
-  - org: "[EnergyAtlas.io](https://energyatlas.io)"
-    location: Ithaca, NY
-    dates: Jan 2025 – Present
-    role: Lead Developer
+      - en: Build python-DuckDB-.NET processing pipelines for AMI and SCADA data for **80,000+ smart meters across 87 feeders**
+        zh: 构建基于 Python、DuckDB 和 .NET 的处理管线，用于分析覆盖 **87 条馈线、80,000+ 块智能电表**的 AMI 与 SCADA 数据。
+      - en: Train sequential clustering and load-duration prediction models on **3.8M load profiles**, **reducing NRMSE by 50.5%**.
+        zh: 基于 **380 万条负荷曲线**训练序列聚类与负荷持续曲线预测模型，**将 NRMSE 降低 50.5%**。
+      - en: + Develop physics-based models to forecast transformer- and feeder-level load profiles, peak demand, and load-duration behavior.
+        zh: 开发物理模型，预测变压器和馈线层级的负荷曲线、峰值需求及负荷持续曲线特征。
+      - en: Quantify demand response and distribution-grid flexibility under heat-pump/electrification growth and DER integration.
+        zh: 量化热泵与电气化增长及分布式能源资源接入情景下的需求响应和配电网灵活性。
+  - org:
+      en: "[EnergyAtlas.io](https://energyatlas.io)"
+      zh: "[EnergyAtlas.io](https://energyatlas.io)"
+    location:
+      en: Ithaca, NY
+      zh: 美国纽约州伊萨卡
+    dates:
+      en: Jan 2025 – Present
+      zh: 2025年1月 – 至今
+    role:
+      en: Lead Developer
+      zh: 首席开发者
     bullets:
-      - Lead development of EnergyAtlas, a C#/.NET city-scale energy digital-twin and simulation platform for building, utility, and urban energy analysis.
-      - Design simulation-engine architecture, RESTful APIs, and data pipelines integrating geometry/LiDAR, weather, schedules, utility data, and large-scale time-series workflows.
-      - + Develop scalable simulation, calibration, solar/shading, and scenario-analysis methods for electrification, peak demand, demand response, and grid flexibility.
-      - + Build Python interfaces, data models, and visualization workflows supporting reproducible analysis and integration with external research and planning tools.
-  - org: Urban Systems Design MEP Engineers
-    location: London, UK
-    dates: Jul 2023 – Sep 2023
-    role: Environmental Engineering Consultant
+      - en: Lead development of EnergyAtlas, a C#/.NET city-scale energy digital-twin and simulation platform for building, utility, and urban energy analysis.
+        zh: 主导开发 EnergyAtlas——一个基于 C#/.NET 的城市尺度能源数字孪生与仿真平台，用于建筑、公用事业及城市能源分析。
+      - en: Design simulation-engine architecture, RESTful APIs, and data pipelines integrating geometry/LiDAR, weather, schedules, utility data, and large-scale time-series workflows.
+        zh: 设计仿真引擎架构、RESTful API 和数据管线，整合几何模型与激光雷达、气象、日程、公用事业数据及大规模时间序列工作流。
+      - en: + Develop scalable simulation, calibration, solar/shading, and scenario-analysis methods for electrification, peak demand, demand response, and grid flexibility.
+        zh: 开发可扩展的仿真、校准、日照与遮阳分析及情景分析方法，服务于电气化、峰值需求、需求响应和电网灵活性研究。
+      - en: + Build Python interfaces, data models, and visualization workflows supporting reproducible analysis and integration with external research and planning tools.
+        zh: 构建 Python 接口、数据模型与可视化工作流，支持可复现分析以及与外部研究和规划工具的集成。
+  - org:
+      en: Urban Systems Design MEP Engineers
+      zh: Urban Systems Design MEP Engineers
+    location:
+      en: London, UK
+      zh: 英国伦敦
+    dates:
+      en: Jul 2023 – Sep 2023
+      zh: 2023年7月 – 2023年9月
+    role:
+      en: Environmental Engineering Consultant
+      zh: 环境工程顾问
     mark: "+"
     bullets:
-      - Conducted sustainability assessment with **CBRE GWS** for 13+ **Google** workplace properties in the Americas.
+      - en: Conducted sustainability assessment with **CBRE GWS** for 13+ **Google** workplace properties in the Americas.
+        zh: 与 **CBRE GWS** 合作，为美洲地区 **13+** 个 **Google** 办公场所开展可持续性评估。

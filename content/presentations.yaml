@@ -1,21 +1,42 @@
 # yaml-language-server: $schema=../schema/cv-section.schema.json
-title: Presentations
+title:
+  en: Presentations
+  zh: 学术报告
 type: rows
 items:
-  - text: >-
-      **"City-scale digital twins for building energy modeling and carbon
-      reduction planning"** — [Cesium Developer Conference
-      2026](https://cesium.com/events/cesium-developer-conference/2026/),
-      Philadelphia, PA. [Video](https://youtu.be/Ro-Bmdrd3LI?si=juQdGL6CxXeEeuCZ)
-    date: Jun 2026
-  - text: >-
-      **"How Cities Can Plan the Energy Transition Using Urban Building Energy
-      Models"** — [IBPSA-USA Educational
-      Webinar](https://www.ibpsa.us/events/how-cities-can-plan-the-energy-transition-using-urban-building-energy-models/).
-      [Video](https://www.youtube.com/watch?v=ZhmSMdbdWA4)
-    date: Feb 2026
-  - text: >-
-      **"Urban Decarbonization Strategies"** — [IBPSA USA Simulation Showcase
-      Webinar Series
-      2026](https://www.ibpsa.us/events/simulation-showcase-urban-scale/).
-    date: Jan 2026
+  - text:
+      en: >-
+        **"City-scale digital twins for building energy modeling and carbon
+        reduction planning"** — [Cesium Developer Conference
+        2026](https://cesium.com/events/cesium-developer-conference/2026/),
+        Philadelphia, PA. [Video](https://youtu.be/Ro-Bmdrd3LI?si=juQdGL6CxXeEeuCZ)
+      zh: >-
+        **“面向建筑能耗建模与碳减排规划的城市尺度数字孪生”** — [Cesium 开发者大会
+        2026](https://cesium.com/events/cesium-developer-conference/2026/)，
+        美国宾夕法尼亚州费城。[视频](https://youtu.be/Ro-Bmdrd3LI?si=juQdGL6CxXeEeuCZ)
+    date:
+      en: Jun 2026
+      zh: 2026年6月
+  - text:
+      en: >-
+        **"How Cities Can Plan the Energy Transition Using Urban Building Energy
+        Models"** — [IBPSA-USA Educational
+        Webinar](https://www.ibpsa.us/events/how-cities-can-plan-the-energy-transition-using-urban-building-energy-models/).
+        [Video](https://www.youtube.com/watch?v=ZhmSMdbdWA4)
+      zh: >-
+        **“城市如何利用城市建筑能耗模型规划能源转型”** — [IBPSA-USA 教育网络研讨会](https://www.ibpsa.us/events/how-cities-can-plan-the-energy-transition-using-urban-building-energy-models/)。
+        [视频](https://www.youtube.com/watch?v=ZhmSMdbdWA4)
+    date:
+      en: Feb 2026
+      zh: 2026年2月
+  - text:
+      en: >-
+        **"Urban Decarbonization Strategies"** — [IBPSA USA Simulation Showcase
+        Webinar Series
+        2026](https://www.ibpsa.us/events/simulation-showcase-urban-scale/).
+      zh: >-
+        **“城市脱碳策略”** — [IBPSA USA Simulation Showcase 网络研讨会系列
+        2026](https://www.ibpsa.us/events/simulation-showcase-urban-scale/)。
+    date:
+      en: Jan 2026
+      zh: 2026年1月

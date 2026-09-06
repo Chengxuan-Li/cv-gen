@@ -1,16 +1,42 @@
 # yaml-language-server: $schema=../schema/cv-section.schema.json
-title: Awards & Funding
+title:
+  en: Awards & Funding
+  zh: 奖项与资助
 type: rows
 items:
-  - text: "**[Nemetschek Innovation Award](https://www.mdsi.tum.de/en/gni/news/news-single-view/article/winners-of-the-nemetschek-innovation-award-2026/) (€60,000 prize)** — *Second place; highest award conferred*"
-    date: May 2026
-  - text: "+ **[IBPSA-USA Simulation Showcase](https://www.ibpsa.us/simulation-showcase/) ($600 prize)** — *Winner*"
-    date: May 2026
-  - text: "**[New York State Pollution Prevention Institute Competition](https://www.rit.edu/affiliate/nysp2i/rd-student-competition) ($3,000 prize)** — *Winner*"
-    date: Apr 2026
-  - text: "**NYSP2I Research Grant ($4,000)** — *Co-PI with Prof. Timur Dogan*"
-    date: Nov 2025
-  - text: "+ **Holcim Building Tomorrow Scholarship** — *Winner; full sponsorship for the One Young World Summit 2025*"
-    date: Oct 2025
-  - text: "+ **[Bentley Systems Going Digital Awards 2025](https://investors.bentley.com/news-releases/news-release-details/bentley-systems-announces-winners-2025-going-digital-awards)** — *Founders' Honors*"
-    date: Oct 2025
+  - text:
+      en: "**[Nemetschek Innovation Award](https://www.mdsi.tum.de/en/gni/news/news-single-view/article/winners-of-the-nemetschek-innovation-award-2026/) (€60,000 prize)** — *Second place; highest award conferred*"
+      zh: "**[Nemetschek 创新奖](https://www.mdsi.tum.de/en/gni/news/news-single-view/article/winners-of-the-nemetschek-innovation-award-2026/)（奖金 €60,000）** — *第二名；本届授予的最高奖项*"
+    date:
+      en: May 2026
+      zh: 2026年5月
+  - text:
+      en: "+ **[IBPSA-USA Simulation Showcase](https://www.ibpsa.us/simulation-showcase/) ($600 prize)** — *Winner*"
+      zh: "**[IBPSA-USA 仿真展示赛](https://www.ibpsa.us/simulation-showcase/)（奖金 $600）** — *冠军*"
+    date:
+      en: May 2026
+      zh: 2026年5月
+  - text:
+      en: "**[New York State Pollution Prevention Institute Competition](https://www.rit.edu/affiliate/nysp2i/rd-student-competition) ($3,000 prize)** — *Winner*"
+      zh: "**[纽约州污染预防研究所竞赛](https://www.rit.edu/affiliate/nysp2i/rd-student-competition)（奖金 $3,000）** — *冠军*"
+    date:
+      en: Apr 2026
+      zh: 2026年4月
+  - text:
+      en: "**NYSP2I Research Grant ($4,000)** — *Co-PI with Prof. Timur Dogan*"
+      zh: "**NYSP2I 研究资助（$4,000）** — *与 Timur Dogan 教授共同担任项目负责人*"
+    date:
+      en: Nov 2025
+      zh: 2025年11月
+  - text:
+      en: "+ **Holcim Building Tomorrow Scholarship** — *Winner; full sponsorship for the One Young World Summit 2025*"
+      zh: "**Holcim Building Tomorrow 奖学金** — *奖学金获得者；获得 One Young World Summit 2025 全额资助*"
+    date:
+      en: Oct 2025
+      zh: 2025年10月
+  - text:
+      en: "+ **[Bentley Systems Going Digital Awards 2025](https://investors.bentley.com/news-releases/news-release-details/bentley-systems-announces-winners-2025-going-digital-awards)** — *Founders' Honors*"
+      zh: "**[Bentley Systems Going Digital Awards 2025](https://investors.bentley.com/news-releases/news-release-details/bentley-systems-announces-winners-2025-going-digital-awards)** — *创始人荣誉奖*"
+    date:
+      en: Oct 2025
+      zh: 2025年10月

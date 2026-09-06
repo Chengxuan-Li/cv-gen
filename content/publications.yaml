@@ -1,32 +1,62 @@
 # yaml-language-server: $schema=../schema/cv-section.schema.json
-title: Selected Publications
+title:
+  en: Selected Publications
+  zh: 代表性论文
 type: prose
 items:
-  - >-
-    + **Chengxuan Li**, Zihan Jimmy Wang, and Timur Dogan. "ShadingZip:
-    Within-Building Selective Computation of Shading Profiles for Urban Building
-    Energy Models." *ASIM 2026*. Accepted.
-  - >-
-    **Chengxuan Li** and Timur Dogan. "Calendars of the City: Deterministic
-    Schedule Libraries to Enhance UBEM Load Duration Forecasts." *IBPSA-USA
-    SimBuild 2026*. [Paper](https://publications.ibpsa.org/conference/paper/?id=simbuild2026_1321)
-    · [DOI: 10.26868/30680611.2026.1321](https://doi.org/10.26868/30680611.2026.1321)
-  - >-
-    **Chengxuan Li** and Timur Dogan. "Deriving high-fidelity residential
-    building archetypes and typical usage patterns from national energy use
-    surveys ..." *Building Simulation 2025, 19th Conference of IBPSA*.
-    [Paper](https://publications.ibpsa.org/conference/paper/?id=bs2025_1336)
-    · [DOI: 10.26868/25222708.2025.1336](https://doi.org/10.26868/25222708.2025.1336)
-  - >-
-    Timur Dogan, **Chengxuan Li**, Hung Ming Tseng, Amber Jiayu Su, and Patrick
-    Kastner. "A Bottom-Up Urban Building Energy Model for Evaluating Thermal Load
-    Electrification Measures." *Journal of Building Performance Simulation*.
-    Published online July 2025; volume 19, issue 2 (2026), pages 289–316.
-    [Paper](https://www.tandfonline.com/doi/full/10.1080/19401493.2025.2536261)
-    · [DOI: 10.1080/19401493.2025.2536261](https://doi.org/10.1080/19401493.2025.2536261)
-  - >-
-    + Hang Xu, **Chengxuan Li**, Patrick Kastner, and Timur Dogan.
-    "Understanding Urban Building Energy Consumption with Explainable Machine
-    Learning Approaches." *CAAD Futures 2025*.
-    [Paper](https://doi.org/10.25442/hku.29349755)
-    · [DOI: 10.25442/hku.29349755](https://doi.org/10.25442/hku.29349755)
+  - en: >-
+      + **Chengxuan Li**, Zihan Jimmy Wang, and Timur Dogan. "ShadingZip:
+      Within-Building Selective Computation of Shading Profiles for Urban Building
+      Energy Models." *ASIM 2026*. Accepted.
+    zh: >-
+      **Chengxuan Li**, Zihan Jimmy Wang, and Timur Dogan. "ShadingZip:
+      Within-Building Selective Computation of Shading Profiles for Urban Building
+      Energy Models." *ASIM 2026*。已接收。
+  - en: >-
+      **Chengxuan Li** and Timur Dogan. "Calendars of the City: Deterministic
+      Schedule Libraries to Enhance UBEM Load Duration Forecasts." *IBPSA-USA
+      SimBuild 2026*. [Paper](https://publications.ibpsa.org/conference/paper/?id=simbuild2026_1321)
+      · [DOI: 10.26868/30680611.2026.1321](https://doi.org/10.26868/30680611.2026.1321)
+    zh: >-
+      **Chengxuan Li** and Timur Dogan. "Calendars of the City: Deterministic
+      Schedule Libraries to Enhance UBEM Load Duration Forecasts." *IBPSA-USA
+      SimBuild 2026*。[论文](https://publications.ibpsa.org/conference/paper/?id=simbuild2026_1321)
+      · [DOI: 10.26868/30680611.2026.1321](https://doi.org/10.26868/30680611.2026.1321)
+  - en: >-
+      **Chengxuan Li** and Timur Dogan. "Deriving high-fidelity residential
+      building archetypes and typical usage patterns from national energy use
+      surveys ..." *Building Simulation 2025, 19th Conference of IBPSA*.
+      [Paper](https://publications.ibpsa.org/conference/paper/?id=bs2025_1336)
+      · [DOI: 10.26868/25222708.2025.1336](https://doi.org/10.26868/25222708.2025.1336)
+    zh: >-
+      **Chengxuan Li** and Timur Dogan. "Deriving high-fidelity residential
+      building archetypes and typical usage patterns from national energy use
+      surveys ..." *Building Simulation 2025, 19th Conference of IBPSA*。
+      [论文](https://publications.ibpsa.org/conference/paper/?id=bs2025_1336)
+      · [DOI: 10.26868/25222708.2025.1336](https://doi.org/10.26868/25222708.2025.1336)
+  - en: >-
+      Timur Dogan, **Chengxuan Li**, Hung Ming Tseng, Amber Jiayu Su, and Patrick
+      Kastner. "A Bottom-Up Urban Building Energy Model for Evaluating Thermal Load
+      Electrification Measures." *Journal of Building Performance Simulation*.
+      Published online July 2025; volume 19, issue 2 (2026), pages 289–316.
+      [Paper](https://www.tandfonline.com/doi/full/10.1080/19401493.2025.2536261)
+      · [DOI: 10.1080/19401493.2025.2536261](https://doi.org/10.1080/19401493.2025.2536261)
+    zh: >-
+      Timur Dogan, **Chengxuan Li**, Hung Ming Tseng, Amber Jiayu Su, and Patrick
+      Kastner. "A Bottom-Up Urban Building Energy Model for Evaluating Thermal Load
+      Electrification Measures." *Journal of Building Performance Simulation*。
+      2025年7月在线发表；第19卷第2期（2026年），第289–316页。
+      [论文](https://www.tandfonline.com/doi/full/10.1080/19401493.2025.2536261)
+      · [DOI: 10.1080/19401493.2025.2536261](https://doi.org/10.1080/19401493.2025.2536261)
+  - en: >-
+      + Hang Xu, **Chengxuan Li**, Patrick Kastner, and Timur Dogan.
+      "Understanding Urban Building Energy Consumption with Explainable Machine
+      Learning Approaches." *CAAD Futures 2025*.
+      [Paper](https://doi.org/10.25442/hku.29349755)
+      · [DOI: 10.25442/hku.29349755](https://doi.org/10.25442/hku.29349755)
+    zh: >-
+      Hang Xu, **Chengxuan Li**, Patrick Kastner, and Timur Dogan.
+      "Understanding Urban Building Energy Consumption with Explainable Machine
+      Learning Approaches." *CAAD Futures 2025*。
+      [论文](https://doi.org/10.25442/hku.29349755)
+      · [DOI: 10.25442/hku.29349755](https://doi.org/10.25442/hku.29349755)

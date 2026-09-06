@@ -1,8 +1,13 @@
 # yaml-language-server: $schema=../schema/cv-section.schema.json
-title: Research Interests
+title:
+  en: Research Interests
+  zh: 研究方向
 type: prose
 items:
-  - >-
-    AI/ML for engineering; inverse modeling, system identification, and
-    surrogate learning; physics-informed learning; urban energy and power-system
-    simulation; smart-meter/grid analytics; demand response and DER integration.
+  - en: >-
+      AI/ML for engineering; inverse modeling, system identification, and
+      surrogate learning; physics-informed learning; urban energy and power-system
+      simulation; smart-meter/grid analytics; demand response and DER integration.
+    zh: >-
+      面向工程的人工智能与机器学习；反演建模、系统辨识与代理学习；物理信息学习；
+      城市能源与电力系统仿真；智能电表与电网数据分析；需求响应与分布式能源资源集成。

@@ -1,16 +1,42 @@
 # yaml-language-server: $schema=../schema/cv-section.schema.json
-title: Technical Skills
+title:
+  en: Technical Skills
+  zh: 技术技能
 type: labels
 items:
-  - label: Programming
-    text: Python, C#/.NET, C++, SQL
-  - label: ML & scientific computing
-    text: PyTorch, scikit-learn, pandas, NumPy; inverse and surrogate modeling, computational optimization, Monte Carlo simulation, system identification, time-series and signal processing
-  - label: Energy & grid modeling
-    text: RC and reduced-order models, load-profile and load-duration analysis; smart-meter AMI/SCADA
-  - label: Power systems
-    text: AC power flow (NR/FDLF), contingency and static security analysis, state estimation, ED/OPF, demand response and flexibility, DER integration
-  - label: Advanced scientific computing
-    text: + statsmodels; numerical methods, uncertainty and sensitivity analysis, reduced-order modeling, parameter estimation
-  - label: Software, data & geospatial
-    text: + ASP.NET/REST APIs, SQL/DuckDB, GeoPandas/Shapely/NetTopologySuite, LiDAR processing
+  - label:
+      en: Programming
+      zh: 编程语言
+    text:
+      en: Python, C#/.NET, C++, SQL
+      zh: Python、C#/.NET、C++、SQL
+  - label:
+      en: ML & scientific computing
+      zh: 机器学习与科学计算
+    text:
+      en: PyTorch, scikit-learn, pandas, NumPy; inverse and surrogate modeling, computational optimization, Monte Carlo simulation, system identification, time-series and signal processing
+      zh: PyTorch、scikit-learn、pandas、NumPy；反演与代理建模、计算优化、蒙特卡洛模拟、系统辨识、时间序列与信号处理
+  - label:
+      en: Energy & grid modeling
+      zh: 能源与电网建模
+    text:
+      en: RC and reduced-order models, load-profile and load-duration analysis; smart-meter AMI/SCADA
+      zh: RC 与降阶模型、负荷曲线与负荷持续曲线分析；智能电表 AMI/SCADA
+  - label:
+      en: Power systems
+      zh: 电力系统
+    text:
+      en: AC power flow (NR/FDLF), contingency and static security analysis, state estimation, ED/OPF, demand response and flexibility, DER integration
+      zh: 交流潮流计算（NR/FDLF）、预想事故与静态安全分析、状态估计、ED/OPF、需求响应与灵活性、分布式能源资源集成
+  - label:
+      en: Advanced scientific computing
+      zh: 高级科学计算
+    text:
+      en: + statsmodels; numerical methods, uncertainty and sensitivity analysis, reduced-order modeling, parameter estimation
+      zh: statsmodels；数值方法、不确定性与敏感性分析、降阶建模、参数估计
+  - label:
+      en: Software, data & geospatial
+      zh: 软件、数据与地理空间分析
+    text:
+      en: + ASP.NET/REST APIs, SQL/DuckDB, GeoPandas/Shapely/NetTopologySuite, LiDAR processing
+      zh: ASP.NET/REST API、SQL/DuckDB、GeoPandas/Shapely/NetTopologySuite、激光雷达数据处理
